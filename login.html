@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>澳門賭場追蹤 — 登入</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0A0A0A">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:       #0A0A0A;
+      --surface:  #141414;
+      --card:     rgba(22, 22, 26, 0.8);
+      --card2:    rgba(30, 30, 36, 0.6);
+      --gold:     #D4AF37;
+      --gold-dim: rgba(212,175,55,0.5);
+      --border:   rgba(255,255,255,0.07);
+      --text:     #E8E8E8;
+      --text-sub: #888888;
+      --text-muted:#555555;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', 'Noto Sans TC', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Ambient glow */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -10%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(212,175,55,0.06) 0%, transparent 65%);
+      filter: blur(60px);
+      pointer-events: none;
+    }
+
+    /* ── Login Card ── */
+    .login-card {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      padding: 48px 40px;
+      background: linear-gradient(145deg, rgba(22,22,26,0.85) 0%, rgba(12,12,15,0.9) 100%);
+      backdrop-filter: blur(32px);
+      -webkit-backdrop-filter: blur(32px);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-top: 1px solid rgba(212,175,55,0.15);
+      border-radius: 28px;
+      box-shadow: 0 40px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+      margin: 20px;
+      animation: fadeUp 0.5s cubic-bezier(0.16,1,0.3,1) both;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Brand */
+    .login-brand {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .login-logo {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 64px;
+      height: 64px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, rgba(212,175,55,0.15) 0%, rgba(212,175,55,0.05) 100%);
+      border: 1px solid rgba(212,175,55,0.2);
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      box-shadow: 0 8px 24px rgba(212,175,55,0.1);
+    }
+
+    .login-title {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .login-subtitle {
+      font-size: 0.8rem;
+      color: var(--gold-dim);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    /* Section labels */
+    .login-section-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: rgba(212,175,55,0.7);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+
+    /* Email input */
+    .input-group {
+      margin-bottom: 20px;
+    }
+
+    .input-field {
+      width: 100%;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-size: 0.95rem;
+      color: var(--text);
+      font-family: 'Inter', 'Noto Sans TC', sans-serif;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      outline: none;
+    }
+
+    .input-field::placeholder { color: var(--text-muted); }
+
+    .input-field:focus {
+      border-color: rgba(212,175,55,0.4);
+      box-shadow: 0 0 0 3px rgba(212,175,55,0.08), 0 0 16px rgba(212,175,55,0.05);
+      background: rgba(212,175,55,0.02);
+    }
+
+    /* Primary button */
+    .btn-primary {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      font-family: 'Inter', 'Noto Sans TC', sans-serif;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: linear-gradient(135deg, #E5C354 0%, #D4AF37 50%, #B8902A 100%);
+      color: #0A0A0A;
+      box-shadow: 0 4px 16px rgba(212,175,55,0.2);
+      letter-spacing: 0.3px;
+      margin-bottom: 12px;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #F0D060 0%, #E5C354 50%, #D4AF37 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(212,175,55,0.3);
+    }
+
+    .btn-primary:active { transform: translateY(0); }
+
+    /* Divider */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 20px 0;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.06);
+    }
+
+    /* OAuth buttons */
+    .oauth-btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      font-size: 0.9rem;
+      font-family: 'Inter', 'Noto Sans TC', sans-serif;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .oauth-btn:hover {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255,255,255,0.12);
+    }
+
+    .oauth-icon { font-size: 1.2rem; }
+
+    /* Notice */
+    .login-notice {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 24px;
+      line-height: 1.6;
+    }
+
+    .login-notice a { color: var(--gold-dim); text-decoration: none; }
+
+    /* Loading state */
+    .btn-primary.loading {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .btn-primary.loading::after {
+      content: ' …';
+    }
+
+    /* Error */
+    .error-msg {
+      background: rgba(229,57,53,0.1);
+      border: 1px solid rgba(229,57,53,0.2);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 0.85rem;
+      color: #E57373;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .error-msg.show { display: block; }
+
+    /* Success */
+    .success-msg {
+      background: rgba(76,175,80,0.1);
+      border: 1px solid rgba(76,175,80,0.2);
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 0.85rem;
+      color: #81C784;
+      text-align: center;
+      display: none;
+    }
+
+    .success-msg.show { display: block; }
+
+    /* Footer */
+    .login-footer {
+      text-align: center;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 24px;
+      letter-spacing: 1px;
+    }
+
+    /* Version tag */
+    .version-tag {
+      position: fixed;
+      bottom: 16px;
+      right: 20px;
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+    }
+
+    /* Demo notice */
+    .demo-notice {
+      background: rgba(74,144,226,0.1);
+      border: 1px solid rgba(74,144,226,0.2);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 0.8rem;
+      color: #82C4F8;
+      margin-bottom: 20px;
+      line-height: 1.6;
+      display: none; /* Supabase 已配置，預設隱藏 */
+    }
+
+    @media (max-width: 480px) {
+      .login-card { padding: 36px 24px; border-radius: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-card">
+    <!-- Brand -->
+    <div class="login-brand">
+      <div class="login-logo">🏰</div>
+      <div class="login-title">澳門賭場追蹤</div>
+      <div class="login-subtitle">Macau Casino Tracker</div>
+    </div>
+
+    <!-- Error -->
+    <div class="error-msg" id="errorMsg"></div>
+
+    <!-- Success (Magic Link sent) -->
+    <div class="success-msg" id="successMsg">
+      ✉️ 登入連結已發送至你的郵箱<br>
+      請點擊郵件中的連結完成登入
+    </div>
+
+    <!-- Demo notice -->
+    <div class="demo-notice" id="demoNotice">
+      ⚠️ 尚未配置 Supabase<br>
+      請先在 <code>js/supabase.js</code> 填入你的 URL 與 ANON_KEY
+    </div>
+
+    <!-- Email Magic Link -->
+    <div class="login-section-label">郵箱登入（推薦）</div>
+    <div class="input-group">
+      <input
+        type="email"
+        id="emailInput"
+        class="input-field"
+        placeholder="your@email.com"
+        autocomplete="email"
+      >
+    </div>
+    <button class="btn-primary" id="magicLinkBtn" onclick="handleMagicLink()">
+      ✉️ 發送登入連結
+    </button>
+
+    <div class="divider">或</div>
+
+    <!-- OAuth -->
+    <div class="login-section-label">一鍵登入</div>
+    <button class="oauth-btn" onclick="handleGoogle()">
+      <span class="oauth-icon">🌐</span> Google 帳戶
+    </button>
+
+    <div class="login-notice">
+      登入即表示你同意我們的<br>
+      <a href="#">隱私政策</a> · 你的數據僅自己可見
+    </div>
+  </div>
+
+  <div class="login-footer">v2.0 · Ultra-Luxury FinTech Edition</div>
+  <div class="version-tag">PWA Ready</div>
+
+  <script type="module">
+    import { signInWithEmail, signInWithGoogle } from './js/auth.js';
+    import { onAuthStateChange } from './js/auth.js';
+    import { supabase } from './js/supabase.js';
+
+    const errorEl    = document.getElementById('errorMsg');
+    const successEl  = document.getElementById('successMsg');
+    const emailInput = document.getElementById('emailInput');
+    const magicBtn   = document.getElementById('magicLinkBtn');
+    const demoNotice = document.getElementById('demoNotice');
+
+    // 動態檢測：若 URL 仍是 placeholder，顯示提示
+    const url = supabase.supabaseUrl || '';
+    if (url.includes('YOUR_SUPABASE') || url === '' || !url.startsWith('https://')) {
+      demoNotice.style.display = 'block';
+      emailInput.disabled = true;
+      magicBtn.disabled = true;
+    }
+
+    function showError(msg) {
+      errorEl.textContent = msg;
+      errorEl.classList.add('show');
+      successEl.classList.remove('show');
+    }
+
+    function showSuccess() {
+      successEl.classList.add('show');
+      errorEl.classList.remove('show');
+      emailInput.value = '';
+      magicBtn.textContent = '✅ 已發送！';
+      magicBtn.classList.add('loading');
+      setTimeout(() => {
+        magicBtn.textContent = '✉️ 重新發送連結';
+        magicBtn.classList.remove('loading');
+      }, 5000);
+    }
+
+    // Check if already logged in → redirect
+    onAuthStateChange((event, session) => {
+      if (session?.user) {
+        window.location.href = 'index.html';
+      }
+    });
+
+    window.handleMagicLink = async function() {
+      const email = emailInput.value.trim();
+      if (!email) { showError('請輸入郵箱地址'); return; }
+      if (!email.includes('@')) { showError('請輸入有效的郵箱格式'); return; }
+
+      try {
+        magicBtn.classList.add('loading');
+        magicBtn.textContent = '發送中…';
+        await signInWithEmail(email);
+        showSuccess();
+      } catch (err) {
+        showError(err.message || '發送失敗，請稍後再試');
+        magicBtn.textContent = '✉️ 發送登入連結';
+        magicBtn.classList.remove('loading');
+      }
+    };
+
+    window.handleGoogle = async function() {
+      try {
+        await signInWithGoogle();
+      } catch (err) {
+        showError(err.message || 'Google 登入失敗');
+      }
+    };
+
+    // Enter key submits
+    emailInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') handleMagicLink();
+    });
+  </script>
+</body>
+</html>

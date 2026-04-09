@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0A0A0A" />
+  <meta name="description" content="記錄澳門各賭場遊玩積分、盈虧分析、優惠兌換追蹤" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='96' fill='%230A0A0A'/><text x='50%25' y='54%25' font-size='300' dominant-baseline='middle' text-anchor='middle'>🏰</text></svg>" />
+  <title>澳門賭場玩家追蹤</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- Background decorative elements -->
+  <div class="bg-suit bg-suit-1">♠</div>
+  <div class="bg-suit bg-suit-2">♥</div>
+  <div class="bg-suit bg-suit-3">♦</div>
+  <div class="bg-suit bg-suit-4">♣</div>
+  <div class="bg-suit bg-suit-5">♠</div>
+  <div class="bg-suit bg-suit-6">♥</div>
+  <div class="bg-glow"></div>
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="header-chip">
+        <span class="chip-label">MOP</span>
+        <span class="chip-dot"></span>
+      </div>
+      <div class="header-text">
+        <span class="header-suit">♠</span>
+        <h1 class="header-title">澳門賭場玩家追蹤</h1>
+        <span class="header-suit">♥</span>
+      </div>
+      <div class="header-chip flip">
+        <span class="chip-label">MOP</span>
+        <span class="chip-dot"></span>
+      </div>
+      <!-- 用戶區（登入後顯示）-->
+      <div class="user-zone" id="userZone" style="display:none">
+        <div class="user-avatar" id="userAvatar">👤</div>
+        <div class="user-info">
+          <div class="user-name" id="userName">—</div>
+          <div class="user-email" id="userEmail"></div>
+        </div>
+        <button class="btn-logout" id="btnLogout" title="登出">🚪</button>
+      </div>
+    </div>
+    <div class="header-subtitle">CASINO PERFORMANCE TRACKER · MACAU</div>
+  </header>
+
+  <!-- Tab Navigation -->
+  <nav class="tab-nav">
+    <button class="tab-btn active" data-tab="dashboard">
+      <span class="tab-icon">📊</span>總覽
+    </button>
+    <button class="tab-btn" data-tab="add-record">
+      <span class="tab-icon">🎰</span>新增記錄
+    </button>
+    <button class="tab-btn" data-tab="history">
+      <span class="tab-icon">📋</span>歷史記錄
+    </button>
+    <button class="tab-btn" data-tab="promotions">
+      <span class="tab-icon">🎁</span>推廣優惠
+    </button>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- ===== 儀表板 ===== -->
+    <section id="tab-dashboard" class="tab-pane active">
+      <div class="section-header">
+        <span class="section-tag">DASHBOARD</span>
+        <h2 class="section-title">遊戲總覽</h2>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-glow"></div>
+          <div class="stat-label">總遊玩次數</div>
+          <div class="stat-value" id="stat-total-sessions">0</div>
+          <div class="stat-unit">次</div>
+        </div>
+        <div class="stat-card gold">
+          <div class="stat-glow gold"></div>
+          <div class="stat-label">已遊玩賭場</div>
+          <div class="stat-value gold" id="stat-casino-count">0</div>
+          <div class="stat-unit">間</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-glow red"></div>
+          <div class="stat-label">總盈虧</div>
+          <div class="stat-value" id="stat-total-winloss">0</div>
+          <div class="stat-unit">MOP</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-glow blue"></div>
+          <div class="stat-label">平均下注</div>
+          <div class="stat-value blue" id="stat-avg-bet">0</div>
+          <div class="stat-unit">MOP / 局</div>
+        </div>
+        <div class="stat-card green">
+          <div class="stat-glow green"></div>
+          <div class="stat-label">勝場</div>
+          <div class="stat-value win" id="stat-win-count">0</div>
+          <div class="stat-unit">win</div>
+        </div>
+        <div class="stat-card red">
+          <div class="stat-glow lose"></div>
+          <div class="stat-label">敗場</div>
+          <div class="stat-value lose" id="stat-lose-count">0</div>
+          <div class="stat-unit">lose</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-glow purple"></div>
+          <div class="stat-label">已兌優惠</div>
+          <div class="stat-value purple" id="stat-promo-count">0</div>
+          <div class="stat-unit">items</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-glow orange"></div>
+          <div class="stat-label">消耗積分</div>
+          <div class="stat-value orange" id="stat-promo-points">0</div>
+          <div class="stat-unit">points</div>
+        </div>
+      </div>
+
+      <!-- 各賭場積分 — 按賭場分組顯示（積分系統各異，不可跨賭場合計） -->
+      <div id="casino-points-section" style="margin-bottom: 32px;">
+        <div class="section-header" style="margin-bottom: 16px;">
+          <span class="section-tag">POINTS BY CASINO</span>
+          <h2 class="section-title">各賭場積分</h2>
+        </div>
+        <div id="casino-points-list" class="casino-points-grid"></div>
+      </div>
+
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">📈 盈虧趨勢</h3>
+            <span class="chart-tag">CUMULATIVE P&L</span>
+          </div>
+          <canvas id="chartWinLoss"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">🎯 遊戲分佈</h3>
+            <span class="chart-tag">GAME PREFERENCE</span>
+          </div>
+          <canvas id="chartGamePref"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 新增遊戲記錄 ===== -->
+    <section id="tab-add-record" class="tab-pane">
+      <div class="section-header">
+        <span class="section-tag">NEW RECORD</span>
+        <h2 class="section-title">新增遊玩記錄</h2>
+      </div>
+
+      <div class="form-card neon-border">
+        <form id="recordForm">
+
+          <!-- 賭場 -->
+          <div class="form-section-label">🏨 賭場資料</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>選擇賭場</label>
+              <select id="rec-casino" onchange="onCasinoChange()">
+                <option value="">— 選擇賭場 —</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>廳 / 區域（選填）</label>
+              <input type="text" id="rec-area" placeholder="例：貴賓廳、中場..." />
+            </div>
+          </div>
+          <div class="form-row" id="custom-casino-row" style="display:none">
+            <div class="form-group full-width">
+              <label>自訂賭場名稱</label>
+              <input type="text" id="rec-custom-casino" placeholder="輸入賭場名稱" />
+            </div>
+          </div>
+
+          <!-- 遊戲類型 -->
+          <div class="form-section-label">🎮 遊戲資料</div>
+
+          <!-- 桌台類型四選一 -->
+          <div class="type-selector">
+            <div class="type-label">遊戲類型</div>
+            <div class="type-buttons">
+              <button type="button" class="type-btn" data-type="rtg" onclick="onGameTypeChange('rtg')">
+                <span class="type-icon">🃏</span>
+                <span class="type-name">RTG<span class="zh">實體牌桌</span></span>
+              </button>
+              <button type="button" class="type-btn" data-type="ltg" onclick="onGameTypeChange('ltg')">
+                <span class="type-icon">📺</span>
+                <span class="type-name">LTG<span class="zh">直播混合</span></span>
+              </button>
+              <button type="button" class="type-btn" data-type="etg" onclick="onGameTypeChange('etg')">
+                <span class="type-icon">🖥️</span>
+                <span class="type-name">ETG<span class="zh">電子機檯</span></span>
+              </button>
+              <button type="button" class="type-btn" data-type="slot" onclick="onGameTypeChange('slot')">
+                <span class="type-icon">🎰</span>
+                <span class="type-name">SLOT<span class="zh">老虎機</span></span>
+              </button>
+            </div>
+          </div>
+          <input type="hidden" id="rec-game-type" value="rtg" />
+
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label>遊戲名稱</label>
+              <select id="rec-game"></select>
+            </div>
+          </div>
+          <div class="form-row" id="custom-game-row" style="display:none">
+            <div class="form-group full-width">
+              <label>自訂遊戲名稱</label>
+              <input type="text" id="rec-custom-game" placeholder="輸入遊戲名稱" />
+            </div>
+          </div>
+
+          <!-- 日期時間 -->
+          <div class="form-row">
+            <div class="form-group">
+              <label>遊玩日期時間</label>
+              <input type="datetime-local" id="rec-datetime" required />
+            </div>
+          </div>
+
+          <!-- 積分 / 下注 / 盈虧 -->
+          <div class="form-section-label">💰 金額資料</div>
+          <div class="form-row three-col">
+            <div class="form-group">
+              <label>⭐ 賺取積分</label>
+              <input type="number" id="rec-points" placeholder="0" min="0" step="0.01" />
+            </div>
+            <div class="form-group">
+              <label>🎲 平均下注 (MOP)</label>
+              <input type="number" id="rec-avg-bet" placeholder="0" min="0" step="0.01" />
+            </div>
+            <div class="form-group">
+              <label>📊 實際盈虧 (MOP)</label>
+              <input type="number" id="rec-winloss" placeholder="正數=贏 / 負數=輸" step="1" />
+            </div>
+          </div>
+
+          <!-- 備註 -->
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label>📝 備註</label>
+              <textarea id="rec-note" placeholder="桌台號碼、特殊情況、特殊優惠..." rows="2"></textarea>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary neon-btn">
+              <span>💾</span> 儲存記錄
+            </button>
+            <button type="reset" class="btn btn-ghost" onclick="setTimeout(resetFormDefaults, 50)">清除</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- ===== 歷史記錄 ===== -->
+    <section id="tab-history" class="tab-pane">
+      <div class="section-header">
+        <span class="section-tag">RECORDS</span>
+        <h2 class="section-title">歷史記錄</h2>
+      </div>
+
+      <div class="history-toolbar">
+        <div class="toolbar-search">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="history-search" placeholder="搜尋賭場、遊戲、備註..." oninput="renderHistory()" />
+        </div>
+        <div class="toolbar-filters">
+          <select id="history-filter-type" onchange="renderHistory()">
+            <option value="">全部類型</option>
+            <option value="rtg">🃏 RTG 實體牌桌</option>
+            <option value="ltg">📺 LTG 直播混合</option>
+            <option value="etg">🖥️ ETG 電子機檯</option>
+            <option value="slot">🎰 老虎機</option>
+          </select>
+          <select id="history-filter-result" onchange="renderHistory()">
+            <option value="">全部結果</option>
+            <option value="win">勝</option>
+            <option value="lose">負</option>
+            <option value="break">平</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="history-list" class="history-list"></div>
+    </section>
+
+    <!-- ===== 推廣優惠 ===== -->
+    <section id="tab-promotions" class="tab-pane">
+      <div class="section-header">
+        <span class="section-tag">PROMOTIONS</span>
+        <h2 class="section-title">推廣優惠</h2>
+      </div>
+
+      <!-- Promo Stats Summary Panel (collapsible) -->
+      <div class="promo-summary-panel" id="promo-summary-panel">
+        <button class="promo-summary-toggle" onclick="togglePromoSummary()" id="promo-summary-toggle">
+          <span>📊 優惠概覽</span>
+          <span class="toggle-arrow" id="promo-toggle-arrow">▾</span>
+        </button>
+        <div class="promo-summary-body" id="promo-summary-body">
+          <div class="stats-grid" id="promo-stats-grid">
+            <div class="stat-card">
+              <div class="stat-glow orange"></div>
+              <div class="stat-label">總兌換</div>
+              <div class="stat-value orange" id="pstat-count">0</div>
+              <div class="stat-unit">次</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-glow orange"></div>
+              <div class="stat-label">消耗積分</div>
+              <div class="stat-value orange" id="pstat-points">0</div>
+              <div class="stat-unit">pts</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-glow gold"></div>
+              <div class="stat-label">🏨 活躍賭場</div>
+              <div class="stat-value gold" id="pstat-casinos">0</div>
+              <div class="stat-unit">間</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-glow blue"></div>
+              <div class="stat-label">🍽️ 餐飲</div>
+              <div class="stat-value blue" id="pstat-fb">0</div>
+              <div class="stat-unit">次</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-glow green"></div>
+              <div class="stat-label">🛏️ 住宿</div>
+              <div class="stat-value green" id="pstat-room">0</div>
+              <div class="stat-unit">次</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-glow purple"></div>
+              <div class="stat-label">🎰 推廣籌碼</div>
+              <div class="stat-value purple" id="pstat-credit">0</div>
+              <div class="stat-unit">次</div>
+            </div>
+          </div>
+          <!-- Promo Charts -->
+          <div class="charts-grid" id="promo-charts-grid">
+            <div class="chart-card">
+              <div class="chart-header">
+                <h3 class="chart-title">🍽️ 類別分佈</h3>
+                <span class="chart-tag">BY CATEGORY</span>
+              </div>
+              <div class="donut-wrapper">
+                <canvas id="chart-promo-cat" height="200"></canvas>
+              </div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-header">
+                <h3 class="chart-title">🏨 賭場分佈</h3>
+                <span class="chart-tag">BY CASINO</span>
+              </div>
+              <div class="donut-wrapper">
+                <canvas id="chart-promo-casino" height="200"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-card neon-border promo-form">
+        <div class="form-section-label">➕ 新增兌換</div>
+        <form id="promoForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label>兌換日期</label>
+              <input type="date" id="promo-date" required />
+            </div>
+            <div class="form-group">
+              <label>優惠類別</label>
+              <select id="promo-category">
+                <option value="fb">🍽️ 餐飲 F&amp;B</option>
+                <option value="room">🛏️ 住宿 Room</option>
+                <option value="credit">🎰 推廣籌碼</option>
+                <option value="transport">🚗 交通 Transport</option>
+                <option value="gift">🎁 禮品 Gift</option>
+                <option value="spa">💆 水療/娛樂 Spa &amp; Ent.</option>
+                <option value="other">✨ 其他 Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>🏨 賭場</label>
+              <select id="promo-casino">
+                <option value="">— 選擇賭場 —</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label>優惠項目名稱</label>
+              <input type="text" id="promo-item" placeholder="例：自助午餐兩位、免費房一晚..." required />
+            </div>
+          </div>
+          <div class="form-row three-col">
+            <div class="form-group">
+              <label>積分類型</label>
+              <select id="promo-point-type" onchange="togglePromoDays()">
+                <option value="daily">每日積分</option>
+                <option value="cumulative">累計積分</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>⭐ 所需積分</label>
+              <input type="number" id="promo-points-required" placeholder="0" min="0" step="0.01" />
+            </div>
+            <div class="form-group" id="promo-days-group" style="display:none">
+              <label>📅 累計天數</label>
+              <input type="number" id="promo-days" placeholder="例：7" min="1" step="1" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group full-width">
+              <label>📝 備註</label>
+              <textarea id="promo-note" placeholder="優惠有效期、詳情..." rows="2"></textarea>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary neon-btn"><span>🎁</span> 儲存優惠</button>
+            <button type="reset" class="btn btn-ghost">清除</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="promo-list-panel" id="promo-list-panel">
+        <button class="promo-summary-toggle" onclick="togglePromoList()" id="promo-list-toggle-btn">
+          <span>📋 優惠兌換記錄</span>
+          <span class="toggle-arrow" id="promo-list-arrow">▾</span>
+        </button>
+        <div class="promo-summary-body" id="promo-list-body">
+          <div class="promo-filter-row" style="margin-bottom:16px">
+            <select id="promo-filter-casino" onchange="renderPromos()">
+              <option value="">全部賭場</option>
+            </select>
+            <select id="promo-filter-cat" onchange="renderPromos()">
+              <option value="">全部類別</option>
+              <option value="fb">🍽️ 餐飲</option>
+              <option value="room">🛏️ 住宿</option>
+              <option value="credit">🎰 推廣籌碼</option>
+              <option value="transport">🚗 交通</option>
+              <option value="gift">🎁 禮品</option>
+              <option value="spa">💆 水療/娛樂</option>
+              <option value="other">✨ 其他</option>
+            </select>
+          </div>
+          <div id="promo-list" class="history-list"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== 編輯遊戲記錄 Modal ===== -->
+  <div id="editModal" class="modal-overlay" style="display:none">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 class="modal-title">✏️ 編輯記錄</h2>
+        <button class="modal-close" onclick="closeEditModal()">✕</button>
+      </div>
+      <form id="editRecordForm">
+        <input type="hidden" id="edit-id" />
+
+        <div class="form-section-label">🏨 賭場資料</div>
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label>選擇賭場</label>
+            <select id="edit-casino" onchange="onEditCasinoChange()"></select>
+          </div>
+        </div>
+        <div class="form-row" id="edit-custom-casino-row" style="display:none">
+          <div class="form-group full-width">
+            <label>自訂賭場名稱</label>
+            <input type="text" id="edit-custom-casino" />
+          </div>
+        </div>
+
+        <div class="form-section-label">🎮 遊戲資料</div>
+        <div class="type-selector">
+          <div class="type-label">遊戲類型</div>
+          <div class="type-buttons">
+            <button type="button" class="type-btn" data-type="rtg" onclick="onEditGameTypeChange('rtg')"><span class="type-icon">🃏</span><span class="type-name">RTG<span class="zh">實體牌桌</span></span></button>
+            <button type="button" class="type-btn" data-type="ltg" onclick="onEditGameTypeChange('ltg')"><span class="type-icon">📺</span><span class="type-name">LTG<span class="zh">直播混合</span></span></button>
+            <button type="button" class="type-btn" data-type="etg" onclick="onEditGameTypeChange('etg')"><span class="type-icon">🖥️</span><span class="type-name">ETG<span class="zh">電子機檯</span></span></button>
+            <button type="button" class="type-btn" data-type="slot" onclick="onEditGameTypeChange('slot')"><span class="type-icon">🎰</span><span class="type-name">SLOT<span class="zh">老虎機</span></span></button>
+          </div>
+        </div>
+        <input type="hidden" id="edit-game-type" value="rtg" />
+
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label>遊戲名稱</label>
+            <select id="edit-game" onchange="onEditGameChange()"></select>
+          </div>
+        </div>
+        <div class="form-row" id="edit-custom-game-row" style="display:none">
+          <div class="form-group full-width">
+            <label>自訂遊戲名稱</label>
+            <input type="text" id="edit-custom-game" />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>遊玩日期時間</label><input type="datetime-local" id="edit-datetime" required /></div>
+        </div>
+
+        <div class="form-section-label">💰 金額資料</div>
+        <div class="form-row three-col">
+          <div class="form-group"><label>⭐ 賺取積分</label><input type="number" id="edit-points" step="0.01" /></div>
+          <div class="form-group"><label>🎲 平均下注</label><input type="number" id="edit-avg-bet" step="0.01" /></div>
+          <div class="form-group"><label>📊 實際盈虧</label><input type="number" id="edit-winloss" step="1" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group full-width"><label>📝 備註</label><textarea id="edit-note" rows="2"></textarea></div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary neon-btn"><span>💾</span> 更新</button>
+          <button type="button" class="btn btn-ghost" onclick="closeEditModal()">取消</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== 編輯優惠 Modal ===== -->
+  <div id="editPromoModal" class="modal-overlay" style="display:none">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2 class="modal-title">✏️ 編輯優惠</h2>
+        <button class="modal-close" onclick="closeEditPromoModal()">✕</button>
+      </div>
+      <form id="editPromoForm">
+        <input type="hidden" id="ep-id" />
+        <div class="form-row">
+          <div class="form-group"><label>兌換日期</label><input type="date" id="ep-date" required /></div>
+          <div class="form-group">
+            <label>優惠類別</label>
+            <select id="ep-category">
+              <option value="fb">🍽️ 餐飲</option>
+              <option value="room">🛏️ 住宿</option>
+              <option value="credit">🎰 推廣籌碼</option>
+              <option value="transport">🚗 交通</option>
+              <option value="gift">🎁 禮品</option>
+              <option value="spa">💆 水療/娛樂</option>
+              <option value="other">✨ 其他</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>🏨 賭場</label>
+            <select id="ep-casino">
+              <option value="">— 選擇賭場 —</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row"><div class="form-group full-width"><label>優惠項目</label><input type="text" id="ep-item" required /></div></div>
+        <div class="form-row three-col">
+          <div class="form-group"><label>積分類型</label><select id="ep-point-type"><option value="daily">每日積分</option><option value="cumulative">累計積分</option></select></div>
+          <div class="form-group"><label>⭐ 所需積分</label><input type="number" id="ep-points-required" step="0.01" /></div>
+          <div class="form-group"><label>📅 累計天數</label><input type="number" id="ep-days" step="1" /></div>
+        </div>
+        <div class="form-row"><div class="form-group full-width"><label>📝 備註</label><textarea id="ep-note" rows="2"></textarea></div></div>
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary neon-btn"><span>💾</span> 更新</button>
+          <button type="button" class="btn btn-ghost" onclick="closeEditPromoModal()">取消</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== 刪除確認 Modal ===== -->
+  <div id="deleteModal" class="modal-overlay" style="display:none">
+    <div class="modal-box modal-sm">
+      <div class="modal-header">
+        <h2 class="modal-title">⚠️ 確認刪除</h2>
+        <button class="modal-close" onclick="closeDeleteModal()">✕</button>
+      </div>
+      <p class="modal-body-text">確定要刪除此記錄嗎？<br/><span style="color:var(--text-muted)">此操作無法復原。</span></p>
+      <div class="form-actions">
+        <button class="btn btn-danger" id="confirmDeleteBtn"><span>🗑️</span> 確認刪除</button>
+        <button class="btn btn-ghost" onclick="closeDeleteModal()">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+  <!-- Auth Guard + Service Worker Registration -->
+  <script type="module">
+    import { getCurrentUser, onAuthStateChange, signOut, getProfile } from './js/auth.js';
+    import { setUserId } from './js/db.js';
+
+    // ── Service Worker ──
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(err =>
+        console.warn('SW registration failed:', err)
+      );
+    }
+
+    // ── Auth Guard ──
+    async function initAuth() {
+      const user = await getCurrentUser().catch(() => null);
+
+      if (!user) {
+        // 未登入 → 跳轉 login.html
+        window.location.href = 'login.html';
+        return;
+      }
+
+      // 已登入 → 初始化用戶資訊
+      setUserId(user.id);
+      const profile = await getProfile(user.id).catch(() => null);
+
+      document.getElementById('userZone').style.display = '';
+      document.getElementById('userEmail').textContent = user.email || '';
+      document.getElementById('userName').textContent  = profile?.nickname || (user.email ? user.email.split('@')[0] : '玩家');
+
+      // 頭像字母
+      const initial = (profile?.nickname || user.email?.[0] || 'U').toUpperCase();
+      document.getElementById('userAvatar').textContent = initial;
+
+      // 登出
+      document.getElementById('btnLogout').addEventListener('click', signOut);
+
+      // 觸發 app.js init
+      window.__AUTH_READY__ = true;
+      window.dispatchEvent(new Event('auth-ready'));
+    }
+
+    initAuth();
+
+    // 監聽即時認證變化
+    onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_OUT' || !session?.user) {
+        window.location.href = 'login.html';
+      }
+    });
+  </script>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

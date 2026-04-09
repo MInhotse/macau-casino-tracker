@@ -1,0 +1,22 @@
+{
+  "name": "澳門賭場追蹤",
+  "short_name": "賭場追蹤",
+  "description": "記錄澳門各賭場遊玩積分、盈虧分析、優惠兌換追蹤",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#0A0A0A",
+  "theme_color": "#0A0A0A",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='96' fill='%230A0A0A'/><text x='50%25' y='50%25' font-size='280' dominant-baseline='middle' text-anchor='middle'>🏰</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "utilities"],
+  "lang": "zh-Hant",
+  "dir": "ltr"
+}
