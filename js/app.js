@@ -370,12 +370,12 @@ function renderHistory() {
         <div class="hi-meta">
           <span>📅 ${dt}</span>
           <span>⭐ ${(r.points || 0) > 0 ? '+' : ''}${(r.points || 0).toLocaleString()} 積分</span>
-          <span>🎲 均注 MOP ${(r.avg_bet || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</span>
+          <span>🎲 均注 HKD ${(r.avg_bet || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</span>
         </div>
         ${r.note ? `<div class="hi-note">📝 ${r.note}</div>` : ''}
       </div>
       <div>
-        <div class="hi-winloss ${wlValClass}">${wlSign}${wl.toLocaleString()} MOP</div>
+        <div class="hi-winloss ${wlValClass}">${wlSign}${wl.toLocaleString()} HKD</div>
         <div class="hi-actions">
           <button class="btn-icon" onclick="openEditModal('${r.id}')" title="編輯">✏️</button>
           <button class="btn-icon" onclick="openDeleteModal('${r.id}', 'record')" title="刪除">🗑️</button>
@@ -528,7 +528,7 @@ function renderChartWinLoss(records) {
     data: {
       labels,
       datasets: [{
-        label: '累計盈虧 MOP',
+        label: '累計盈虧 HKD',
         data,
         borderColor: '#D4AF37',
         backgroundColor: (ctx) => {
@@ -557,7 +557,7 @@ function renderChartWinLoss(records) {
           titleColor: '#A0A0A0',
           bodyColor: '#F5F5F5',
           padding: 12,
-          callbacks: { label: ctx => ` MOP ${ctx.parsed.y.toLocaleString()}` },
+          callbacks: { label: ctx => ` HKD ${ctx.parsed.y.toLocaleString()}` },
         },
       },
       scales: {
@@ -916,3 +916,22 @@ async function initApp() {
 window.addEventListener('auth-ready', () => {
   initApp();
 });
+
+// ==============================
+// 將所有 inline handler 函數暴露到 window
+//（app.js 是 ES Module，函數預設不在 window 上）
+// ==============================
+window.onCasinoChange        = onCasinoChange;
+window.onGameTypeChange      = onGameTypeChange;
+window.onGameChange          = onGameChange;
+window.onEditCasinoChange    = onEditCasinoChange;
+window.onEditGameTypeChange  = onEditGameTypeChange;
+window.onEditGameChange      = onEditGameChange;
+window.togglePromoDays       = togglePromoDays;
+window.togglePromoSummary    = togglePromoSummary;
+window.togglePromoList       = togglePromoList;
+window.renderHistory         = renderHistory;
+window.renderPromos           = renderPromos;
+window.closeEditModal        = closeEditModal;
+window.closeEditPromoModal   = closeEditPromoModal;
+window.closeDeleteModal      = closeDeleteModal;
