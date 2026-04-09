@@ -81,3 +81,9 @@ CREATE POLICY "promos: own row only" ON public.casino_promos
 -- ==========================================
 -- ALTER PUBLICATION supabase_realtime ADD TABLE public.casino_records;
 -- ALTER PUBLICATION supabase_realtime ADD TABLE public.casino_promos;
+
+-- ==========================================
+-- 升級：新增本金欄位（已有數據庫使用者執行）
+-- ==========================================
+ALTER TABLE public.casino_records ADD COLUMN IF NOT EXISTS start_coin NUMERIC DEFAULT 0;
+ALTER TABLE public.casino_records ADD COLUMN IF NOT EXISTS end_coin   NUMERIC DEFAULT 0;

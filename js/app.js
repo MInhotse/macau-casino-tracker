@@ -278,9 +278,11 @@ document.getElementById('recordForm').addEventListener('submit', async function(
     area:      document.getElementById('rec-area').value.trim(),
     game_type: gameType,
     game:      gameName,
-    points:    parseFloat(document.getElementById('rec-points').value) || 0,
-    avg_bet:   parseFloat(document.getElementById('rec-avg-bet').value) || 0,
-    win_loss:  parseFloat(document.getElementById('rec-winloss').value) || 0,
+    points:      parseFloat(document.getElementById('rec-points').value) || 0,
+    avg_bet:     parseFloat(document.getElementById('rec-avg-bet').value) || 0,
+    win_loss:    parseFloat(document.getElementById('rec-winloss').value) || 0,
+    start_coin:  parseFloat(document.getElementById('rec-start-coin').value) || 0,
+    end_coin:    parseFloat(document.getElementById('rec-end-coin').value) || 0,
     note:      document.getElementById('rec-note').value.trim(),
   };
 
@@ -371,6 +373,7 @@ function renderHistory() {
           <span>📅 ${dt}</span>
           <span>⭐ ${(r.points || 0) > 0 ? '+' : ''}${(r.points || 0).toLocaleString()} 積分</span>
           <span>🎲 均注 HKD ${(r.avg_bet || 0).toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}</span>
+          ${(r.start_coin || r.end_coin) ? `<span>💰 本金 ${(r.start_coin||0).toLocaleString()} → ${(r.end_coin||0).toLocaleString()} HKD</span>` : ''}
         </div>
         ${r.note ? `<div class="hi-note">📝 ${r.note}</div>` : ''}
       </div>
@@ -465,6 +468,18 @@ function updateDashboard() {
   document.getElementById('stat-lose-count').textContent  = loseCount;
   document.getElementById('stat-promo-count').textContent = promoCount;
   document.getElementById('stat-promo-points').textContent= Math.round(promoPoints).toLocaleString();
+
+  // Latest record's start / end coin
+  const latest = records[0];  // newest first (unshift)
+  const scEl = document.getElementById('stat-start-coin');
+  const ecEl = document.getElementById('stat-end-coin');
+  if (latest) {
+    scEl.textContent = (latest.start_coin || 0) > 0 ? (latest.start_coin || 0).toLocaleString() : '—';
+    ecEl.textContent = (latest.end_coin || 0) > 0   ? (latest.end_coin || 0).toLocaleString()   : '—';
+  } else {
+    scEl.textContent = '—';
+    ecEl.textContent = '—';
+  }
 
   // Render per-casino points breakdown
   renderCasinoPoints(records);
@@ -742,6 +757,8 @@ function openEditModal(id) {
   document.getElementById('edit-points').value     = rec.points  || 0;
   document.getElementById('edit-avg-bet').value   = rec.avg_bet || 0;
   document.getElementById('edit-winloss').value   = rec.win_loss || 0;
+  document.getElementById('edit-start-coin').value = rec.start_coin || 0;
+  document.getElementById('edit-end-coin').value   = rec.end_coin || 0;
   document.getElementById('edit-note').value      = rec.note    || '';
 
   document.getElementById('editModal').style.display = 'flex';
@@ -772,9 +789,11 @@ document.getElementById('editRecordForm').addEventListener('submit', async funct
     area:      document.getElementById('edit-area').value.trim(),
     game_type: gameType,
     game:      gameName,
-    points:    parseFloat(document.getElementById('edit-points').value) || 0,
-    avg_bet:   parseFloat(document.getElementById('edit-avg-bet').value) || 0,
-    win_loss:  parseFloat(document.getElementById('edit-winloss').value) || 0,
+    points:     parseFloat(document.getElementById('edit-points').value) || 0,
+    avg_bet:    parseFloat(document.getElementById('edit-avg-bet').value) || 0,
+    win_loss:   parseFloat(document.getElementById('edit-winloss').value) || 0,
+    start_coin: parseFloat(document.getElementById('edit-start-coin').value) || 0,
+    end_coin:   parseFloat(document.getElementById('edit-end-coin').value) || 0,
     note:      document.getElementById('edit-note').value.trim(),
   };
 
@@ -921,17 +940,20 @@ window.addEventListener('auth-ready', () => {
 // 將所有 inline handler 函數暴露到 window
 //（app.js 是 ES Module，函數預設不在 window 上）
 // ==============================
-window.onCasinoChange        = onCasinoChange;
-window.onGameTypeChange      = onGameTypeChange;
-window.onGameChange          = onGameChange;
-window.onEditCasinoChange    = onEditCasinoChange;
-window.onEditGameTypeChange  = onEditGameTypeChange;
-window.onEditGameChange      = onEditGameChange;
-window.togglePromoDays       = togglePromoDays;
-window.togglePromoSummary    = togglePromoSummary;
-window.togglePromoList       = togglePromoList;
-window.renderHistory         = renderHistory;
-window.renderPromos           = renderPromos;
+window.onCasinoChange       = onCasinoChange;
+window.onGameTypeChange     = onGameTypeChange;
+window.onGameChange         = onGameChange;
+window.onEditCasinoChange   = onEditCasinoChange;
+window.onEditGameTypeChange = onEditGameTypeChange;
+window.onEditGameChange     = onEditGameChange;
+window.togglePromoDays      = togglePromoDays;
+window.togglePromoSummary   = togglePromoSummary;
+window.togglePromoList      = togglePromoList;
+window.renderHistory        = renderHistory;
+window.renderPromos          = renderPromos;
+window.openEditModal         = openEditModal;
+window.openEditPromoModal   = openEditPromoModal;
+window.openDeleteModal       = openDeleteModal;
 window.closeEditModal        = closeEditModal;
-window.closeEditPromoModal   = closeEditPromoModal;
-window.closeDeleteModal      = closeDeleteModal;
+window.closeEditPromoModal  = closeEditPromoModal;
+window.closeDeleteModal     = closeDeleteModal;
