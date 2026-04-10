@@ -249,6 +249,30 @@ function onEditCasinoChange() {
 }
 
 // ==============================
+// Promo Category Change (Add Form)
+// ==============================
+function onPromoCategoryChange() {
+  const cat    = document.getElementById('promo-category').value;
+  const fbSub  = document.getElementById('promo-fb-sub-group');
+  const priceRow = document.getElementById('promo-price-row');
+
+  if (fbSub)  fbSub.style.display  = cat === 'fb' ? '' : 'none';
+  if (priceRow) priceRow.style.display = (cat === 'table_credit' || cat === 'slot_credit') ? '' : 'none';
+}
+
+// ==============================
+// Promo Category Change (Edit Modal)
+// ==============================
+function onEditPromoCategoryChange() {
+  const cat      = document.getElementById('ep-category').value;
+  const fbSub    = document.getElementById('ep-fb-sub-group');
+  const priceRow = document.getElementById('ep-price-row');
+
+  if (fbSub)    fbSub.style.display    = cat === 'fb' ? '' : 'none';
+  if (priceRow) priceRow.style.display = (cat === 'table_credit' || cat === 'slot_credit') ? '' : 'none';
+}
+
+// ==============================
 // Promo Days Toggle
 // ==============================
 function togglePromoDays() {
@@ -279,6 +303,7 @@ function initForms() {
 
   onGameTypeChange('rtg');
   document.getElementById('promo-days-group').style.display = 'none';
+  onPromoCategoryChange(); // 初始化優惠類別 UI 狀態
 }
 
 function resetFormDefaults() {
@@ -363,15 +388,25 @@ document.getElementById('recordForm').addEventListener('submit', async function(
 document.getElementById('promoForm').addEventListener('submit', async function(e) {
   e.preventDefault();
 
+  // 決定最終類別：選擇「餐飲」時用次選項值
+  const mainCat = document.getElementById('promo-category').value;
+  const finalCat = mainCat === 'fb'
+    ? document.getElementById('promo-fb-sub').value
+    : mainCat;
+
+  // 價格只在 gaming credit 有意義
+  const hasPrice = (mainCat === 'table_credit' || mainCat === 'slot_credit');
+  const price = hasPrice ? parseFloat(document.getElementById('promo-price').value) || 0 : 0;
+
   const promo = {
     date:            document.getElementById('promo-date').value,
     casino:          document.getElementById('promo-casino').value || '',
-    category:        document.getElementById('promo-category').value,
+    category:        finalCat,
     item:            document.getElementById('promo-item').value.trim(),
     point_type:      document.getElementById('promo-point-type').value,
     points_required: parseFloat(document.getElementById('promo-points-required').value) || 0,
     days:            parseInt(document.getElementById('promo-days').value) || null,
-    price:           parseFloat(document.getElementById('promo-price').value) || 0,
+    price:           price,
     note:            document.getElementById('promo-note').value.trim(),
   };
 
@@ -382,6 +417,7 @@ document.getElementById('promoForm').addEventListener('submit', async function(e
     this.reset();
     document.getElementById('promo-date').value = new Date().toISOString().slice(0, 10);
     document.getElementById('promo-days-group').style.display = 'none';
+    onPromoCategoryChange(); // 重置後同步 UI 狀態
     updatePromoDashboard();
     renderPromos();
   } catch (err) {
@@ -472,7 +508,8 @@ function renderPromos() {
     const casinoChip= p.casino
       ? `<span class="promo-casino-chip">🏨 ${p.casino}</span>`
       : '';
-    const priceTag  = (p.price || 0) > 0
+    // 價格只在 table_credit / slot_credit 顯示
+    const priceTag  = (p.category === 'table_credit' || p.category === 'slot_credit') && (p.price || 0) > 0
       ? `<span style="color:#D4AF37;font-weight:600">💰 ${(p.price||0).toLocaleString()} MOP</span>`
       : '';
 
@@ -737,19 +774,18 @@ function updatePromoDashboard() {
   d('pstat-total-price', promos.reduce((s, p) => s + (p.price || 0), 0).toLocaleString());
   d('pstat-table-price', fmtMOP(tablePromos));
   d('pstat-slot-price',  fmtMOP(slotPromos));
-  d('pstat-fb-price',    fmtMOP(fbPromos));
 
-  // F&B breakdown tags
+  // F&B breakdown tags (只顯示次數，無價格)
   const fbBreakdown = el('promo-fb-breakdown');
   if (fbPromos.length > 0 && fbBreakdown) {
     fbBreakdown.style.display = '';
-    const setFb = (id, arr) => { const e = el(id); if (e) e.textContent = `${arr.length}次 / ${fmtMOP(arr)}`; };
-    setFb('fb-snack',        fbSnack);
-    setFb('fb-breakfast',    fbBreakfast);
-    setFb('fb-lunch',        fbLunch);
-    setFb('fb-afternoon-tea',fbAfternoonTea);
-    setFb('fb-dinner',       fbDinner);
-    setFb('fb-late-night',   fbLateNight);
+    const setFb = (id, arr) => { const e = el(id); if (e) e.textContent = `${arr.length}`; };
+    setFb('fb-snack-row',        fbSnack);
+    setFb('fb-breakfast-row',    fbBreakfast);
+    setFb('fb-lunch-row',        fbLunch);
+    setFb('fb-afternoon-tea-row',fbAfternoonTea);
+    setFb('fb-dinner-row',       fbDinner);
+    setFb('fb-late-night-row',   fbLateNight);
   } else if (fbBreakdown) {
     fbBreakdown.style.display = 'none';
   }
@@ -920,15 +956,34 @@ function openEditPromoModal(id) {
   const promo = _promos.find(p => p.id === id);
   if (!promo) return;
 
+  // 判定是 F&B 哪個子類（fb_*），還是主類
+  const isFbSub = promo.category?.startsWith('fb_');
+  const mainCat = isFbSub ? 'fb' : (promo.category || 'fb');
+
   document.getElementById('ep-id').value               = promo.id;
   document.getElementById('ep-date').value             = promo.date || '';
-  document.getElementById('ep-category').value         = promo.category || 'fb_snack';
+  document.getElementById('ep-category').value         = mainCat;
   populateCasinoSelect(document.getElementById('ep-casino'), promo.casino || '');
+
+  // F&B 次選項
+  const epFbSub  = document.getElementById('ep-fb-sub-group');
+  if (isFbSub) {
+    document.getElementById('ep-fb-sub').value = promo.category;
+    if (epFbSub) epFbSub.style.display = '';
+  } else {
+    if (epFbSub) epFbSub.style.display = 'none';
+  }
+
+  // 價格行（只在 gaming credit 顯示）
+  const epPriceRow = document.getElementById('ep-price-row');
+  const isGamingCredit = (mainCat === 'table_credit' || mainCat === 'slot_credit');
+  if (epPriceRow) epPriceRow.style.display = isGamingCredit ? '' : 'none';
+  document.getElementById('ep-price').value = isGamingCredit ? (promo.price || '') : '';
+
   document.getElementById('ep-item').value            = promo.item || '';
   document.getElementById('ep-point-type').value      = promo.point_type || 'daily';
   document.getElementById('ep-points-required').value  = promo.points_required || 0;
   document.getElementById('ep-days').value            = promo.days || '';
-  document.getElementById('ep-price').value            = promo.price || '';
   document.getElementById('ep-note').value            = promo.note || '';
 
   document.getElementById('editPromoModal').style.display = 'flex';
@@ -941,15 +996,26 @@ function closeEditPromoModal() {
 document.getElementById('editPromoForm').addEventListener('submit', async function(e) {
   e.preventDefault();
   const id = document.getElementById('ep-id').value;
+
+  // 決定最終類別：選擇「餐飲」時用次選項值
+  const mainCat = document.getElementById('ep-category').value;
+  const finalCat = mainCat === 'fb'
+    ? document.getElementById('ep-fb-sub').value
+    : mainCat;
+
+  // 價格只在 gaming credit 有意義
+  const hasPrice = (mainCat === 'table_credit' || mainCat === 'slot_credit');
+  const price = hasPrice ? parseFloat(document.getElementById('ep-price').value) || 0 : 0;
+
   const updates = {
     date:            document.getElementById('ep-date').value,
     casino:          document.getElementById('ep-casino').value || '',
-    category:        document.getElementById('ep-category').value,
+    category:        finalCat,
     item:            document.getElementById('ep-item').value.trim(),
     point_type:      document.getElementById('ep-point-type').value,
     points_required: parseFloat(document.getElementById('ep-points-required').value) || 0,
     days:            parseInt(document.getElementById('ep-days').value) || null,
-    price:           parseFloat(document.getElementById('ep-price').value) || 0,
+    price:           price,
     note:            document.getElementById('ep-note').value.trim(),
   };
 
@@ -1068,15 +1134,17 @@ function calcWinLossPreview(prefix) {
   el.style.color = wl > 0 ? '#4CAF50' : wl < 0 ? '#F44336' : 'var(--gold)';
 }
 
-window.onCasinoChange       = onCasinoChange;
-window.onGameTypeChange     = onGameTypeChange;
-window.onGameChange         = onGameChange;
-window.onEditCasinoChange   = onEditCasinoChange;
-window.onEditGameTypeChange = onEditGameTypeChange;
-window.onEditGameChange     = onEditGameChange;
-window.togglePromoDays      = togglePromoDays;
-window.togglePromoSummary   = togglePromoSummary;
-window.togglePromoList      = togglePromoList;
+window.onCasinoChange           = onCasinoChange;
+window.onGameTypeChange         = onGameTypeChange;
+window.onGameChange             = onGameChange;
+window.onEditCasinoChange       = onEditCasinoChange;
+window.onEditGameTypeChange     = onEditGameTypeChange;
+window.onEditGameChange         = onEditGameChange;
+window.onPromoCategoryChange    = onPromoCategoryChange;
+window.onEditPromoCategoryChange = onEditPromoCategoryChange;
+window.togglePromoDays          = togglePromoDays;
+window.togglePromoSummary       = togglePromoSummary;
+window.togglePromoList          = togglePromoList;
 window.renderHistory        = renderHistory;
 window.renderPromos          = renderPromos;
 window.openEditModal         = openEditModal;

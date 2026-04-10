@@ -367,20 +367,20 @@
               <div class="stat-glow blue"></div>
               <div class="stat-label">🍽️ 餐飲</div>
               <div class="stat-value blue" id="pstat-fb-count">0</div>
-              <div class="stat-unit">次 / <span id="pstat-fb-price">0</span> MOP</div>
+              <div class="stat-unit">次</div>
             </div>
           </div>
-          <!-- F&B 餐飲 breakdown -->
+          <!-- F&B 餐飲 breakdown (次數，不含價格) -->
           <div class="fb-breakdown" id="promo-fb-breakdown" style="margin: 0 0 20px; display:none">
             <div class="fb-row">
-              <span class="fb-tag" id="fb-snack">🌅 早餐 0 / 0 MOP</span>
-              <span class="fb-tag" id="fb-breakfast">🌅 早餐 0 / 0 MOP</span>
-              <span class="fb-tag" id="fb-lunch">🌞 午餐 0 / 0 MOP</span>
+              <span class="fb-tag" id="fb-snack-row">🍽️ 小食 0</span>
+              <span class="fb-tag" id="fb-breakfast-row">🌅 早餐 0</span>
+              <span class="fb-tag" id="fb-lunch-row">🌞 午餐 0</span>
             </div>
             <div class="fb-row">
-              <span class="fb-tag" id="fb-afternoon-tea">🍰 下午茶 0 / 0 MOP</span>
-              <span class="fb-tag" id="fb-dinner">🌙 晚餐 0 / 0 MOP</span>
-              <span class="fb-tag" id="fb-late-night">🌛 宵夜 0 / 0 MOP</span>
+              <span class="fb-tag" id="fb-afternoon-tea-row">🍰 下午茶 0</span>
+              <span class="fb-tag" id="fb-dinner-row">🌙 晚餐 0</span>
+              <span class="fb-tag" id="fb-late-night-row">🌛 宵夜 0</span>
             </div>
           </div>
           <!-- Promo Charts -->
@@ -412,25 +412,28 @@
         <form id="promoForm">
           <div class="form-row">
             <div class="form-group">
-              <label>兌換日期</label>
-              <input type="date" id="promo-date" required />
-            </div>
-            <div class="form-group">
               <label>優惠類別</label>
-              <select id="promo-category">
+              <select id="promo-category" onchange="onPromoCategoryChange()">
                 <option value="table_credit">🎰 賭枱獎賞碼</option>
                 <option value="slot_credit">🎰 角子機獎賞錢</option>
+                <option value="fb">🍽️ 餐飲</option>
+                <option value="room">🛏️ 住宿</option>
+                <option value="transport">🚗 交通</option>
+                <option value="gift">🎁 禮品</option>
+                <option value="spa">💆 水療/娛樂</option>
+                <option value="other">✨ 其他</option>
+              </select>
+            </div>
+            <!-- F&B 次選項：選擇「餐飲」後才顯示 -->
+            <div class="form-group" id="promo-fb-sub-group" style="display:none">
+              <label>🍽️ 餐飲類型</label>
+              <select id="promo-fb-sub">
                 <option value="fb_snack">🍽️ 小食</option>
                 <option value="fb_breakfast">🌅 早餐</option>
                 <option value="fb_lunch">🌞 午餐</option>
                 <option value="fb_afternoon_tea">🍰 下午茶</option>
                 <option value="fb_dinner">🌙 晚餐</option>
                 <option value="fb_late_night">🌛 宵夜</option>
-                <option value="room">🛏️ 住宿</option>
-                <option value="transport">🚗 交通</option>
-                <option value="gift">🎁 禮品</option>
-                <option value="spa">💆 水療/娛樂</option>
-                <option value="other">✨ 其他</option>
               </select>
             </div>
           </div>
@@ -465,7 +468,8 @@
               <input type="number" id="promo-days" placeholder="例：7" min="1" step="1" />
             </div>
           </div>
-          <div class="form-row three-col">
+          <!-- 獎賞價值：只有賭枱/角子機獎賞碼才顯示 -->
+          <div class="form-row" id="promo-price-row" style="display:none">
             <div class="form-group">
               <label>💰 獎賞價值 (MOP)</label>
               <input type="number" id="promo-price" placeholder="0" min="0" step="0.01" />
@@ -479,7 +483,7 @@
           </div>
           <div class="form-actions">
             <button type="submit" class="btn btn-primary neon-btn"><span>🎁</span> 儲存優惠</button>
-            <button type="reset" class="btn btn-ghost">清除</button>
+            <button type="reset" class="btn btn-ghost" onclick="setTimeout(onPromoCategoryChange, 0)">清除</button>
           </div>
         </form>
       </div>
@@ -608,20 +612,27 @@
           <div class="form-group"><label>兌換日期</label><input type="date" id="ep-date" required /></div>
           <div class="form-group">
             <label>優惠類別</label>
-            <select id="ep-category">
+            <select id="ep-category" onchange="onEditPromoCategoryChange()">
               <option value="table_credit">🎰 賭枱獎賞碼</option>
               <option value="slot_credit">🎰 角子機獎賞錢</option>
+              <option value="fb">🍽️ 餐飲</option>
+              <option value="room">🛏️ 住宿</option>
+              <option value="transport">🚗 交通</option>
+              <option value="gift">🎁 禮品</option>
+              <option value="spa">💆 水療/娛樂</option>
+              <option value="other">✨ 其他</option>
+            </select>
+          </div>
+          <!-- F&B 次選項（編輯模式）-->
+          <div class="form-group" id="ep-fb-sub-group" style="display:none">
+            <label>🍽️ 餐飲類型</label>
+            <select id="ep-fb-sub">
               <option value="fb_snack">🍽️ 小食</option>
               <option value="fb_breakfast">🌅 早餐</option>
               <option value="fb_lunch">🌞 午餐</option>
               <option value="fb_afternoon_tea">🍰 下午茶</option>
               <option value="fb_dinner">🌙 晚餐</option>
               <option value="fb_late_night">🌛 宵夜</option>
-              <option value="room">🛏️ 住宿</option>
-              <option value="transport">🚗 交通</option>
-              <option value="gift">🎁 禮品</option>
-              <option value="spa">💆 水療/娛樂</option>
-              <option value="other">✨ 其他</option>
             </select>
           </div>
         </div>
@@ -634,12 +645,13 @@
           </div>
         </div>
         <div class="form-row"><div class="form-group full-width"><label>優惠項目</label><input type="text" id="ep-item" required /></div></div>
-          <div class="form-row three-col">
+        <div class="form-row three-col">
           <div class="form-group"><label>積分類型</label><select id="ep-point-type"><option value="daily">每日積分</option><option value="cumulative">累計積分</option></select></div>
           <div class="form-group"><label>⭐ 所需積分</label><input type="number" id="ep-points-required" step="0.01" /></div>
           <div class="form-group"><label>📅 累計天數</label><input type="number" id="ep-days" step="1" /></div>
         </div>
-        <div class="form-row">
+        <!-- 獎賞價值：只有賭枱/角子機獎賞碼才顯示 -->
+        <div class="form-row" id="ep-price-row" style="display:none">
           <div class="form-group"><label>💰 獎賞價值 (MOP)</label><input type="number" id="ep-price" step="0.01" /></div>
         </div>
         <div class="form-row"><div class="form-group full-width"><label>📝 備註</label><textarea id="ep-note" rows="2"></textarea></div></div>
@@ -676,7 +688,7 @@
 
     // ── Service Worker ──
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js?v=3').catch(err =>
+      navigator.serviceWorker.register('./sw.js?v=4').catch(err =>
         console.warn('SW registration failed:', err)
       );
     }
