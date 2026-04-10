@@ -288,22 +288,36 @@ function initForms() {
   const now = new Date();
   const localISO = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 
-  document.getElementById('rec-datetime').value = localISO;
-  document.getElementById('promo-date').value  = now.toISOString().slice(0, 10);
+  const el = (id) => document.getElementById(id);
 
-  populateCasinoSelect(document.getElementById('rec-casino'));
-  populateCasinoSelect(document.getElementById('promo-casino'));
-  populateCasinoSelect(document.getElementById('promo-filter-casino'));
-  populateGameSelect(document.getElementById('rec-game'), 'rtg');
+  const recDatetime = el('rec-datetime');
+  if (recDatetime) recDatetime.value = localISO;
 
-  // Force select first game option so gameName is never empty
-  const recGame = document.getElementById('rec-game');
-  if (recGame.options.length > 0 && !recGame.value) {
-    recGame.selectedIndex = 0;
+  const promoDate = el('promo-date');
+  if (promoDate) promoDate.value = now.toISOString().slice(0, 10);
+
+  const recCasino = el('rec-casino');
+  if (recCasino) populateCasinoSelect(recCasino);
+
+  const promoCasino = el('promo-casino');
+  if (promoCasino) populateCasinoSelect(promoCasino);
+
+  const promoFilterCasino = el('promo-filter-casino');
+  if (promoFilterCasino) populateCasinoSelect(promoFilterCasino);
+
+  const recGame = el('rec-game');
+  if (recGame) {
+    populateGameSelect(recGame, 'rtg');
+    if (recGame.options.length > 0 && !recGame.value) {
+      recGame.selectedIndex = 0;
+    }
   }
 
   onGameTypeChange('rtg');
-  document.getElementById('promo-days-group').style.display = 'none';
+
+  const promoDaysGroup = el('promo-days-group');
+  if (promoDaysGroup) promoDaysGroup.style.display = 'none';
+
   onPromoCategoryChange(); // 初始化優惠類別 UI 狀態
 }
 
