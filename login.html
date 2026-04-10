@@ -299,6 +299,35 @@
     @media (max-width: 480px) {
       .login-card { padding: 36px 24px; border-radius: 20px; }
     }
+
+    /* Mode toggle */
+    .mode-toggle {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 28px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 4px;
+    }
+    .mode-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 9px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: 'Inter', 'Noto Sans TC', sans-serif;
+      cursor: pointer;
+      background: transparent;
+      color: var(--text-sub);
+      transition: all 0.25s ease;
+    }
+    .mode-btn.active {
+      background: linear-gradient(135deg, #E5C354 0%, #D4AF37 50%, #B8902A 100%);
+      color: #0A0A0A;
+      box-shadow: 0 2px 10px rgba(212,175,55,0.25);
+    }
   </style>
 </head>
 <body>
@@ -326,8 +355,13 @@
       請先在 <code>js/supabase.js</code> 填入你的 URL 與 ANON_KEY
     </div>
 
-    <!-- Email Magic Link -->
-    <div class="login-section-label">郵箱登入（推薦）</div>
+    <!-- Mode Toggle -->
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="btn-login" onclick="setMode('login')">登入</button>
+      <button class="mode-btn" id="btn-register" onclick="setMode('register')">注册</button>
+    </div>
+
+    <!-- Email -->
     <div class="input-group">
       <input
         type="email"
@@ -337,23 +371,35 @@
         autocomplete="email"
       >
     </div>
-    <button class="btn-primary" id="magicLinkBtn" onclick="handleMagicLink()">
-      ✉️ 發送登入連結
-    </button>
 
-    <div class="divider">或</div>
+    <!-- Password -->
+    <div class="input-group">
+      <input
+        type="password"
+        id="passwordInput"
+        class="input-field"
+        placeholder="密碼（最少 6 位）"
+        autocomplete="current-password"
+      >
+    </div>
 
-    <!-- OAuth (已停用，請使用上方郵箱登入) -->
-    <!--
-    <div class="login-section-label">一鍵登入</div>
-    <button class="oauth-btn" onclick="handleGoogle()">
-      <span class="oauth-icon">🌐</span> Google 帳戶
+    <!-- Confirm Password (register only) -->
+    <div class="input-group" id="confirmPwGroup" style="display:none">
+      <input
+        type="password"
+        id="confirmPasswordInput"
+        class="input-field"
+        placeholder="再次輸入密碼確認"
+        autocomplete="new-password"
+      >
+    </div>
+
+    <button class="btn-primary" id="mainBtn" onclick="handleMain()">
+      🔐 登入
     </button>
-    -->
 
     <div class="login-notice">
-      登入即表示你同意我們的<br>
-      <a href="#">隱私政策</a> · 你的數據僅自己可見
+      你的數據僅自己可見<br>密碼請妥善保管
     </div>
   </div>
 
@@ -361,77 +407,109 @@
   <div class="version-tag">PWA Ready</div>
 
   <script type="module">
-    import { signInWithEmail, signInWithGoogle } from './js/auth.js';
+    import { signInWithPassword, signUpWithPassword } from './js/auth.js';
     import { onAuthStateChange } from './js/auth.js';
     import { supabase } from './js/supabase.js';
 
-    const errorEl    = document.getElementById('errorMsg');
-    const successEl  = document.getElementById('successMsg');
-    const emailInput = document.getElementById('emailInput');
-    const magicBtn   = document.getElementById('magicLinkBtn');
-    const demoNotice = document.getElementById('demoNotice');
+    const errorEl        = document.getElementById('errorMsg');
+    const emailInput     = document.getElementById('emailInput');
+    const passwordInput  = document.getElementById('passwordInput');
+    const confirmPwInput = document.getElementById('confirmPasswordInput');
+    const confirmGroup   = document.getElementById('confirmPwGroup');
+    const mainBtn        = document.getElementById('mainBtn');
+    const demoNotice     = document.getElementById('demoNotice');
+    const btnLogin       = document.getElementById('btn-login');
+    const btnRegister    = document.getElementById('btn-register');
 
-    // 動態檢測：若 URL 仍是 placeholder，顯示提示
+    let mode = 'login'; // 'login' | 'register'
+
+    // Demo mode check
     const url = supabase.supabaseUrl || '';
     if (url.includes('YOUR_SUPABASE') || url === '' || !url.startsWith('https://')) {
       demoNotice.style.display = 'block';
       emailInput.disabled = true;
-      magicBtn.disabled = true;
+      passwordInput.disabled = true;
+      mainBtn.disabled = true;
     }
+
+    // ── Mode switch ──
+    window.setMode = function(m) {
+      mode = m;
+      errorEl.classList.remove('show');
+      if (m === 'login') {
+        btnLogin.classList.add('active');
+        btnRegister.classList.remove('active');
+        confirmGroup.style.display = 'none';
+        mainBtn.textContent = '🔐 登入';
+        passwordInput.placeholder = '密碼';
+        passwordInput.autocomplete = 'current-password';
+      } else {
+        btnLogin.classList.remove('active');
+        btnRegister.classList.add('active');
+        confirmGroup.style.display = 'block';
+        mainBtn.textContent = '📝 注册';
+        passwordInput.placeholder = '密碼（最少 6 位）';
+        passwordInput.autocomplete = 'new-password';
+      }
+    };
 
     function showError(msg) {
       errorEl.textContent = msg;
       errorEl.classList.add('show');
-      successEl.classList.remove('show');
     }
 
-    function showSuccess() {
-      successEl.classList.add('show');
-      errorEl.classList.remove('show');
-      emailInput.value = '';
-      magicBtn.textContent = '✅ 已發送！';
-      magicBtn.classList.add('loading');
-      setTimeout(() => {
-        magicBtn.textContent = '✉️ 重新發送連結';
-        magicBtn.classList.remove('loading');
-      }, 5000);
-    }
-
-    // Check if already logged in → redirect
+    // ── Already logged in → redirect ──
     onAuthStateChange((event, session) => {
       if (session?.user) {
         window.location.href = 'index.html';
       }
     });
 
-    window.handleMagicLink = async function() {
-      const email = emailInput.value.trim();
-      if (!email) { showError('請輸入郵箱地址'); return; }
+    window.handleMain = async function() {
+      const email    = emailInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!email)            { showError('請輸入郵箱'); return; }
       if (!email.includes('@')) { showError('請輸入有效的郵箱格式'); return; }
+      if (!password)         { showError('請輸入密碼'); return; }
+      if (password.length < 6) { showError('密碼最少需要 6 位'); return; }
+
+      mainBtn.classList.add('loading');
+      mainBtn.textContent = '處理中…';
+      mainBtn.disabled = true;
 
       try {
-        magicBtn.classList.add('loading');
-        magicBtn.textContent = '發送中…';
-        await signInWithEmail(email);
-        showSuccess();
+        if (mode === 'login') {
+          await signInWithPassword(email, password);
+          // onAuthStateChange 會自動跳轉
+        } else {
+          // Register
+          const confirmPw = confirmPwInput.value;
+          if (password !== confirmPw) {
+            showError('兩次輸入的密碼不一致');
+            mainBtn.textContent = '📝 注册';
+            mainBtn.disabled = false;
+            mainBtn.classList.remove('loading');
+            return;
+          }
+          await signUpWithPassword(email, password);
+          mainBtn.textContent = '✅ 注册成功，請登入！';
+          mainBtn.classList.remove('loading');
+          mainBtn.disabled = false;
+          // Switch to login mode
+          setTimeout(() => setMode('login'), 1500);
+        }
       } catch (err) {
-        showError(err.message || '發送失敗，請稍後再試');
-        magicBtn.textContent = '✉️ 發送登入連結';
-        magicBtn.classList.remove('loading');
-      }
-    };
-
-    window.handleGoogle = async function() {
-      try {
-        await signInWithGoogle();
-      } catch (err) {
-        showError(err.message || 'Google 登入失敗');
+        showError(err.message || '操作失敗，請稍後再試');
+        mainBtn.textContent = mode === 'login' ? '🔐 登入' : '📝 注册';
+        mainBtn.disabled = false;
+        mainBtn.classList.remove('loading');
       }
     };
 
     // Enter key submits
-    emailInput.addEventListener('keydown', e => {
-      if (e.key === 'Enter') handleMagicLink();
+    passwordInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') window.handleMain();
     });
   </script>
 </body>

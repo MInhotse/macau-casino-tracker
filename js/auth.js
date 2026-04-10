@@ -3,15 +3,27 @@
    ========================================== */
 import { supabase } from './supabase.js';
 
-// ─── 郵箱 Magic Link（無需密碼，點連結即登入）───
-export async function signInWithEmail(email) {
-  const { error } = await supabase.auth.signInWithOtp({
+// ─── 郵箱 + 密碼登入（無需發郵件）───
+export async function signInWithPassword(email, password) {
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
+    password,
+  });
+  if (error) throw error;
+  return data;
+}
+
+// ─── 郵箱 + 密碼注册（無需驗證郵件）───
+export async function signUpWithPassword(email, password) {
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
     options: {
       emailRedirectTo: window.location.origin + '/index.html',
     },
   });
   if (error) throw error;
+  return data;
 }
 
 // ─── Google OAuth ───
