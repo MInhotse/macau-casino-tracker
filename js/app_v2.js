@@ -385,42 +385,46 @@ document.getElementById('recordForm').addEventListener('submit', async function(
 // ==============================
 // Promo Form Submit
 // ==============================
+function el2(id) {
+  const el = document.getElementById(id);
+  if (!el) console.error('[promoForm] element not found:', id);
+  return el;
+}
+
 document.getElementById('promoForm').addEventListener('submit', async function(e) {
   e.preventDefault();
 
-  console.log('[promoForm] submit fired, _userId:', getUserId());
-
-  // 決定最終類別：選擇「餐飲」時用次選項值
-  const mainCat = document.getElementById('promo-category').value;
+  const mainCat = el2('promo-category')?.value || '';
   const finalCat = mainCat === 'fb'
-    ? document.getElementById('promo-fb-sub').value
+    ? (el2('promo-fb-sub')?.value || '')
     : mainCat;
 
-  // 價格只在 gaming credit 有意義
   const hasPrice = (mainCat === 'table_credit' || mainCat === 'slot_credit');
-  const price = hasPrice ? parseFloat(document.getElementById('promo-price').value) || 0 : 0;
+  const price = hasPrice ? parseFloat(el2('promo-price')?.value) || 0 : 0;
 
   const promo = {
-    date:            document.getElementById('promo-date').value,
-    casino:          document.getElementById('promo-casino').value || '',
+    date:            el2('promo-date')?.value || '',
+    casino:          el2('promo-casino')?.value || '',
     category:        finalCat,
-    item:            document.getElementById('promo-item').value.trim(),
-    point_type:      document.getElementById('promo-point-type').value,
-    points_required: parseFloat(document.getElementById('promo-points-required').value) || 0,
-    days:            parseInt(document.getElementById('promo-days').value) || null,
+    item:            (el2('promo-item')?.value || '').trim(),
+    point_type:      el2('promo-point-type')?.value || 'daily',
+    points_required: parseFloat(el2('promo-points-required')?.value) || 0,
+    days:            parseInt(el2('promo-days')?.value) || null,
     price:           price,
-    note:            document.getElementById('promo-note').value.trim(),
+    note:            (el2('promo-note')?.value || '').trim(),
   };
 
-  console.log('[promoForm] promo to save:', promo);
+  console.log('[promoForm] promo to save:', promo, '| _userId:', getUserId());
 
   try {
     const saved = await dbAddPromo(promo);
     _promos.unshift(saved);
     window._safeToast('🎁 優惠記錄已儲存');
     this.reset();
-    document.getElementById('promo-date').value = new Date().toISOString().slice(0, 10);
-    document.getElementById('promo-days-group').style.display = 'none';
+    const elDate = el2('promo-date');
+    if (elDate) elDate.value = new Date().toISOString().slice(0, 10);
+    const elDays = el2('promo-days-group');
+    if (elDays) elDays.style.display = 'none';
     onPromoCategoryChange();
     updatePromoDashboard();
     renderPromos();
