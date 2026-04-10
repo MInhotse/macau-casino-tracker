@@ -4,8 +4,9 @@
 import {
   dbLoadRecords, dbAddRecord, dbUpdateRecord, dbDeleteRecord,
   dbLoadPromos,  dbAddPromo,  dbUpdatePromo,  dbDeletePromo,
-  getUserId,
+  getUserId, setUserId,
 } from './db.js';
+import { supabase } from './supabase.js';
 
 // ── Global safe toast (bypass any broken showToast) ──────────────────────────
 window._safeToast = function(msg, isError) {
@@ -1121,10 +1122,20 @@ window.addEventListener('auth-ready', () => {
   initApp();
 });
 
-// Fallback: 如果 auth-ready 已經觸發過，立即執行
+// Fallback 1: 如果 auth-ready 已經觸發過，立即執行
 if (window.__AUTH_READY__) {
   initApp();
 }
+
+// Fallback 2: 直接查 Supabase session（應對已登入但不觸發 auth-ready 的情況）
+(async () => {
+  if (getUserId()) return; // 已有 userId，直接跳過
+  const { data } = await supabase.auth.getSession();
+  if (data?.session?.user) {
+    setUserId(data.session.user.id);
+    await initApp();
+  }
+})();
 
 // Fallback: 立即填充 casino selects（auth 前就應該有資料）
 (function populateCasinoSelectsImmediately() {
