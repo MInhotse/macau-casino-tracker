@@ -53,14 +53,14 @@ const CASINOS = [
 
 // ==============================
 // 遊戲列表
-// RTG = Real Table Game（實體真人牌桌，實體籌碼）
+// Table = Real Table Game（實體真人牌桌，實體籌碼）
 // LTG = Live Table Game（真人荷官，個人電子螢幕下注）
 // ETG = Electronic Table Game（電腦 RNG，無真人荷官）
 // Slot = 老虎機
 // RTG/LTG/ETG 共用同一遊戲清單
 // ==============================
 const TABLE_GAMES = [
-  '免水百家樂 Non-Commission Baccarat',
+  '百家樂 Baccarat',
   '21點 Blackjack',
   '骰寶 Sic Bo',
   '輪盤 Roulette',
