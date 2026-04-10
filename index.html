@@ -341,9 +341,9 @@
             </div>
             <div class="stat-card">
               <div class="stat-glow orange"></div>
-              <div class="stat-label">消耗積分</div>
-              <div class="stat-value orange" id="pstat-points">0</div>
-              <div class="stat-unit">pts</div>
+              <div class="stat-label">💰 總獎賞價值</div>
+              <div class="stat-value orange" id="pstat-total-price">0</div>
+              <div class="stat-unit">MOP</div>
             </div>
             <div class="stat-card">
               <div class="stat-glow gold"></div>
@@ -352,22 +352,35 @@
               <div class="stat-unit">間</div>
             </div>
             <div class="stat-card">
-              <div class="stat-glow blue"></div>
-              <div class="stat-label">🍽️ 餐飲</div>
-              <div class="stat-value blue" id="pstat-fb">0</div>
-              <div class="stat-unit">次</div>
-            </div>
-            <div class="stat-card">
-              <div class="stat-glow green"></div>
-              <div class="stat-label">🛏️ 住宿</div>
-              <div class="stat-value green" id="pstat-room">0</div>
-              <div class="stat-unit">次</div>
+              <div class="stat-glow gold"></div>
+              <div class="stat-label">🎰 賭枱獎賞碼</div>
+              <div class="stat-value gold" id="pstat-table-count">0</div>
+              <div class="stat-unit">次 / <span id="pstat-table-price">0</span> MOP</div>
             </div>
             <div class="stat-card">
               <div class="stat-glow purple"></div>
-              <div class="stat-label">🎰 推廣籌碼</div>
-              <div class="stat-value purple" id="pstat-credit">0</div>
-              <div class="stat-unit">次</div>
+              <div class="stat-label">🎰 角子機獎賞錢</div>
+              <div class="stat-value purple" id="pstat-slot-count">0</div>
+              <div class="stat-unit">次 / <span id="pstat-slot-price">0</span> MOP</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-glow blue"></div>
+              <div class="stat-label">🍽️ 餐飲</div>
+              <div class="stat-value blue" id="pstat-fb-count">0</div>
+              <div class="stat-unit">次 / <span id="pstat-fb-price">0</span> MOP</div>
+            </div>
+          </div>
+          <!-- F&B 餐飲 breakdown -->
+          <div class="fb-breakdown" id="promo-fb-breakdown" style="margin: 0 0 20px; display:none">
+            <div class="fb-row">
+              <span class="fb-tag" id="fb-snack">🌅 早餐 0 / 0 MOP</span>
+              <span class="fb-tag" id="fb-breakfast">🌅 早餐 0 / 0 MOP</span>
+              <span class="fb-tag" id="fb-lunch">🌞 午餐 0 / 0 MOP</span>
+            </div>
+            <div class="fb-row">
+              <span class="fb-tag" id="fb-afternoon-tea">🍰 下午茶 0 / 0 MOP</span>
+              <span class="fb-tag" id="fb-dinner">🌙 晚餐 0 / 0 MOP</span>
+              <span class="fb-tag" id="fb-late-night">🌛 宵夜 0 / 0 MOP</span>
             </div>
           </div>
           <!-- Promo Charts -->
@@ -405,13 +418,19 @@
             <div class="form-group">
               <label>優惠類別</label>
               <select id="promo-category">
-                <option value="fb">🍽️ 餐飲 F&amp;B</option>
-                <option value="room">🛏️ 住宿 Room</option>
-                <option value="credit">🎰 推廣籌碼</option>
-                <option value="transport">🚗 交通 Transport</option>
-                <option value="gift">🎁 禮品 Gift</option>
-                <option value="spa">💆 水療/娛樂 Spa &amp; Ent.</option>
-                <option value="other">✨ 其他 Other</option>
+                <option value="table_credit">🎰 賭枱獎賞碼</option>
+                <option value="slot_credit">🎰 角子機獎賞錢</option>
+                <option value="fb_snack">🍽️ 小食</option>
+                <option value="fb_breakfast">🌅 早餐</option>
+                <option value="fb_lunch">🌞 午餐</option>
+                <option value="fb_afternoon_tea">🍰 下午茶</option>
+                <option value="fb_dinner">🌙 晚餐</option>
+                <option value="fb_late_night">🌛 宵夜</option>
+                <option value="room">🛏️ 住宿</option>
+                <option value="transport">🚗 交通</option>
+                <option value="gift">🎁 禮品</option>
+                <option value="spa">💆 水療/娛樂</option>
+                <option value="other">✨ 其他</option>
               </select>
             </div>
           </div>
@@ -446,6 +465,12 @@
               <input type="number" id="promo-days" placeholder="例：7" min="1" step="1" />
             </div>
           </div>
+          <div class="form-row three-col">
+            <div class="form-group">
+              <label>💰 獎賞價值 (MOP)</label>
+              <input type="number" id="promo-price" placeholder="0" min="0" step="0.01" />
+            </div>
+          </div>
           <div class="form-row">
             <div class="form-group full-width">
               <label>📝 備註</label>
@@ -471,9 +496,15 @@
             </select>
             <select id="promo-filter-cat" onchange="renderPromos()">
               <option value="">全部類別</option>
-              <option value="fb">🍽️ 餐飲</option>
+              <option value="table_credit">🎰 賭枱獎賞碼</option>
+              <option value="slot_credit">🎰 角子機獎賞錢</option>
+              <option value="fb_snack">🍽️ 小食</option>
+              <option value="fb_breakfast">🌅 早餐</option>
+              <option value="fb_lunch">🌞 午餐</option>
+              <option value="fb_afternoon_tea">🍰 下午茶</option>
+              <option value="fb_dinner">🌙 晚餐</option>
+              <option value="fb_late_night">🌛 宵夜</option>
               <option value="room">🛏️ 住宿</option>
-              <option value="credit">🎰 推廣籌碼</option>
               <option value="transport">🚗 交通</option>
               <option value="gift">🎁 禮品</option>
               <option value="spa">💆 水療/娛樂</option>
@@ -578,9 +609,15 @@
           <div class="form-group">
             <label>優惠類別</label>
             <select id="ep-category">
-              <option value="fb">🍽️ 餐飲</option>
+              <option value="table_credit">🎰 賭枱獎賞碼</option>
+              <option value="slot_credit">🎰 角子機獎賞錢</option>
+              <option value="fb_snack">🍽️ 小食</option>
+              <option value="fb_breakfast">🌅 早餐</option>
+              <option value="fb_lunch">🌞 午餐</option>
+              <option value="fb_afternoon_tea">🍰 下午茶</option>
+              <option value="fb_dinner">🌙 晚餐</option>
+              <option value="fb_late_night">🌛 宵夜</option>
               <option value="room">🛏️ 住宿</option>
-              <option value="credit">🎰 推廣籌碼</option>
               <option value="transport">🚗 交通</option>
               <option value="gift">🎁 禮品</option>
               <option value="spa">💆 水療/娛樂</option>
@@ -597,10 +634,13 @@
           </div>
         </div>
         <div class="form-row"><div class="form-group full-width"><label>優惠項目</label><input type="text" id="ep-item" required /></div></div>
-        <div class="form-row three-col">
+          <div class="form-row three-col">
           <div class="form-group"><label>積分類型</label><select id="ep-point-type"><option value="daily">每日積分</option><option value="cumulative">累計積分</option></select></div>
           <div class="form-group"><label>⭐ 所需積分</label><input type="number" id="ep-points-required" step="0.01" /></div>
           <div class="form-group"><label>📅 累計天數</label><input type="number" id="ep-days" step="1" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>💰 獎賞價值 (MOP)</label><input type="number" id="ep-price" step="0.01" /></div>
         </div>
         <div class="form-row"><div class="form-group full-width"><label>📝 備註</label><textarea id="ep-note" rows="2"></textarea></div></div>
         <div class="form-actions">

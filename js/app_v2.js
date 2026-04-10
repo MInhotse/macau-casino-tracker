@@ -121,14 +121,25 @@ const TYPE_LABEL = {
 // 優惠類別
 // ==============================
 const CATEGORY_MAP = {
-  fb:        { label: '餐飲 F&B', emoji: '🍽️' },
-  room:      { label: '住宿 Room', emoji: '🛏️' },
-  credit:    { label: '推廣籌碼',  emoji: '🎰' },
-  transport: { label: '交通',      emoji: '🚗' },
-  gift:      { label: '禮品 Gift', emoji: '🎁' },
-  spa:       { label: '水療/娛樂', emoji: '💆' },
-  other:     { label: '其他',      emoji: '✨' },
+  table_credit:     { label: '賭枱獎賞碼',    emoji: '🎰' },
+  slot_credit:     { label: '角子機獎賞錢',  emoji: '🎰' },
+  fb_snack:        { label: '小食',           emoji: '🍽️' },
+  fb_breakfast:    { label: '早餐',           emoji: '🌅' },
+  fb_lunch:        { label: '午餐',           emoji: '🌞' },
+  fb_afternoon_tea:{ label: '下午茶',         emoji: '🍰' },
+  fb_dinner:       { label: '晚餐',           emoji: '🌙' },
+  fb_late_night:   { label: '宵夜',           emoji: '🌛' },
+  room:            { label: '住宿',           emoji: '🛏️' },
+  transport:       { label: '交通',           emoji: '🚗' },
+  gift:            { label: '禮品',           emoji: '🎁' },
+  spa:             { label: '水療/娛樂',     emoji: '💆' },
+  other:           { label: '其他',           emoji: '✨' },
 };
+
+function promoCatLabel(cat) {
+  const info = CATEGORY_MAP[cat] || { label: cat, emoji: '✨' };
+  return info.emoji + ' ' + info.label;
+}
 
 // ==============================
 // genId（db.js 已匯出，這裡保留給前端局部用）
@@ -360,6 +371,7 @@ document.getElementById('promoForm').addEventListener('submit', async function(e
     point_type:      document.getElementById('promo-point-type').value,
     points_required: parseFloat(document.getElementById('promo-points-required').value) || 0,
     days:            parseInt(document.getElementById('promo-days').value) || null,
+    price:           parseFloat(document.getElementById('promo-price').value) || 0,
     note:            document.getElementById('promo-note').value.trim(),
   };
 
@@ -460,6 +472,9 @@ function renderPromos() {
     const casinoChip= p.casino
       ? `<span class="promo-casino-chip">🏨 ${p.casino}</span>`
       : '';
+    const priceTag  = (p.price || 0) > 0
+      ? `<span style="color:#D4AF37;font-weight:600">💰 ${(p.price||0).toLocaleString()} MOP</span>`
+      : '';
 
     return `<div class="promo-item">
       <div class="hi-main">
@@ -470,6 +485,7 @@ function renderPromos() {
         </div>
         <div class="promo-meta">
           <span>📅 ${p.date}</span>
+          ${priceTag}
           <span>⭐ ${(p.points_required || 0).toLocaleString()} 積分</span>
           <span>📌 ${ptLabel}</span>
         </div>
@@ -697,29 +713,64 @@ function togglePromoList() {
 function updatePromoDashboard() {
   const promos = _promos;
 
-  const fbCount    = promos.filter(p => p.category === 'fb').length;
-  const roomCount  = promos.filter(p => p.category === 'room').length;
-  const creditCount = promos.filter(p => p.category === 'credit').length;
-  const totalPoints = promos.reduce((s, p) => s + (p.points_required || 0), 0);
   const distinctCasinos = [...new Set(promos.map(p => p.casino).filter(Boolean))];
+  const tablePromos     = promos.filter(p => p.category === 'table_credit');
+  const slotPromos      = promos.filter(p => p.category === 'slot_credit');
+  const fbPromos        = promos.filter(p => p.category?.startsWith('fb_'));
+  const fbSnack         = promos.filter(p => p.category === 'fb_snack');
+  const fbBreakfast     = promos.filter(p => p.category === 'fb_breakfast');
+  const fbLunch         = promos.filter(p => p.category === 'fb_lunch');
+  const fbAfternoonTea  = promos.filter(p => p.category === 'fb_afternoon_tea');
+  const fbDinner        = promos.filter(p => p.category === 'fb_dinner');
+  const fbLateNight     = promos.filter(p => p.category === 'fb_late_night');
 
   const el = (id) => document.getElementById(id);
-  const d = (id, val) => { const e = el(id); if (e) e.textContent = val; };
+  const d  = (id, val) => { const e = el(id); if (e) e.textContent = val; };
 
   d('pstat-count',   promos.length);
-  d('pstat-points',  Math.round(totalPoints).toLocaleString());
-  d('pstat-fb',      fbCount);
-  d('pstat-room',    roomCount);
-  d('pstat-credit',  creditCount);
   d('pstat-casinos', distinctCasinos.length);
+  d('pstat-table-count', tablePromos.length);
+  d('pstat-slot-count',  slotPromos.length);
+  d('pstat-fb-count',    fbPromos.length);
+
+  const fmtMOP = (arr) => arr.reduce((s, p) => s + (p.price || 0), 0).toLocaleString();
+  d('pstat-total-price', promos.reduce((s, p) => s + (p.price || 0), 0).toLocaleString());
+  d('pstat-table-price', fmtMOP(tablePromos));
+  d('pstat-slot-price',  fmtMOP(slotPromos));
+  d('pstat-fb-price',    fmtMOP(fbPromos));
+
+  // F&B breakdown tags
+  const fbBreakdown = el('promo-fb-breakdown');
+  if (fbPromos.length > 0 && fbBreakdown) {
+    fbBreakdown.style.display = '';
+    const setFb = (id, arr) => { const e = el(id); if (e) e.textContent = `${arr.length}次 / ${fmtMOP(arr)}`; };
+    setFb('fb-snack',        fbSnack);
+    setFb('fb-breakfast',    fbBreakfast);
+    setFb('fb-lunch',        fbLunch);
+    setFb('fb-afternoon-tea',fbAfternoonTea);
+    setFb('fb-dinner',       fbDinner);
+    setFb('fb-late-night',   fbLateNight);
+  } else if (fbBreakdown) {
+    fbBreakdown.style.display = 'none';
+  }
 
   renderPromoCharts(promos);
 }
 
 function renderPromoCharts(promos) {
   // Category donut
-  const CAT_LABELS = { fb:'🍽️ 餐飲', room:'🛏️ 住宿', credit:'🎰 推廣籌碼', transport:'🚗 交通', gift:'🎁 禮品', spa:'💆 水療', other:'✨ 其他' };
-  const CAT_COLORS = { fb:'#4A90E2', room:'#4CAF50', credit:'#D4AF37', transport:'#FF8C00', gift:'#E53935', spa:'#9C5CF5', other:'#8E9EAB' };
+  const CAT_LABELS = {
+    table_credit:'🎰 賭枱獎賞碼', slot_credit:'🎰 角子機獎賞錢',
+    fb_snack:'🍽️ 小食', fb_breakfast:'🌅 早餐', fb_lunch:'🌞 午餐',
+    fb_afternoon_tea:'🍰 下午茶', fb_dinner:'🌙 晚餐', fb_late_night:'🌛 宵夜',
+    room:'🛏️ 住宿', transport:'🚗 交通', gift:'🎁 禮品', spa:'💆 水療', other:'✨ 其他',
+  };
+  const CAT_COLORS = {
+    table_credit:'#D4AF37', slot_credit:'#9C27B0',
+    fb_snack:'#4A90E2', fb_breakfast:'#FF9800', fb_lunch:'#FFB74D',
+    fb_afternoon_tea:'#CE93D8', fb_dinner:'#4CAF50', fb_late_night:'#607D8B',
+    room:'#4CAF50', transport:'#FF8C00', gift:'#E53935', spa:'#9C5CF5', other:'#8E9EAB',
+  };
 
   const catCount = {};
   promos.forEach(p => { const k = p.category || 'other'; catCount[k] = (catCount[k] || 0) + 1; });
@@ -871,12 +922,13 @@ function openEditPromoModal(id) {
 
   document.getElementById('ep-id').value               = promo.id;
   document.getElementById('ep-date').value             = promo.date || '';
-  document.getElementById('ep-category').value         = promo.category || 'fb';
+  document.getElementById('ep-category').value         = promo.category || 'fb_snack';
   populateCasinoSelect(document.getElementById('ep-casino'), promo.casino || '');
   document.getElementById('ep-item').value            = promo.item || '';
   document.getElementById('ep-point-type').value      = promo.point_type || 'daily';
   document.getElementById('ep-points-required').value  = promo.points_required || 0;
   document.getElementById('ep-days').value            = promo.days || '';
+  document.getElementById('ep-price').value            = promo.price || '';
   document.getElementById('ep-note').value            = promo.note || '';
 
   document.getElementById('editPromoModal').style.display = 'flex';
@@ -897,6 +949,7 @@ document.getElementById('editPromoForm').addEventListener('submit', async functi
     point_type:      document.getElementById('ep-point-type').value,
     points_required: parseFloat(document.getElementById('ep-points-required').value) || 0,
     days:            parseInt(document.getElementById('ep-days').value) || null,
+    price:           parseFloat(document.getElementById('ep-price').value) || 0,
     note:            document.getElementById('ep-note').value.trim(),
   };
 

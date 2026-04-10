@@ -337,6 +337,30 @@ body::after {
 
 .stat-unit { font-size: 0.7rem; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; }
 
+/* --- F&B Breakdown Tags --- */
+.fb-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 0 16px;
+}
+.fb-row {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+.fb-tag {
+  background: rgba(74,144,226,0.12);
+  border: 1px solid rgba(74,144,226,0.3);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 0.72rem;
+  color: var(--text-sub);
+  white-space: nowrap;
+  flex: 1;
+  text-align: center;
+}
+
 /* --- Per-Casino Points Grid --- */
 .casino-points-grid {
   display: grid;
