@@ -91,7 +91,7 @@ const GAME_LIST = {
 // 遊戲類型顯示名稱
 // ==============================
 const TYPE_LABEL = {
-  rtg:  { name: 'RTG 實體牌桌', badge: 'rtg' },
+  rtg:  { name: 'Table 實體牌桌', badge: 'rtg' },
   ltg:  { name: 'LTG 直播混合', badge: 'ltg' },
   etg:  { name: 'ETG 電子機檯', badge: 'etg' },
   slot: { name: 'Slot 老虎機',  badge: 'slot' },
