@@ -280,11 +280,14 @@ document.getElementById('recordForm').addEventListener('submit', async function(
     game:      gameName,
     points:      parseFloat(document.getElementById('rec-points').value) || 0,
     avg_bet:     parseFloat(document.getElementById('rec-avg-bet').value) || 0,
-    win_loss:    parseFloat(document.getElementById('rec-winloss').value) || 0,
     start_coin:  parseFloat(document.getElementById('rec-start-coin').value) || 0,
     end_coin:    parseFloat(document.getElementById('rec-end-coin').value) || 0,
     note:      document.getElementById('rec-note').value.trim(),
   };
+  // 自動計算盈虧 = 起始 - 結束（輸錢→正值→win_loss>0 表示贏，此處：賺錢時 start>end，故 win_loss = start-end > 0 = 贏）
+  // 澳門賭場慣例：帶多少進去，少了就是輸。start_coin=10000, end_coin=8000 => win_loss = -2000（輸了2000）
+  // 所以 win_loss = end_coin - start_coin（正=贏，負=輸）
+  record.win_loss = (record.end_coin || 0) - (record.start_coin || 0);
 
   try {
     const saved = await dbAddRecord(record);
@@ -756,9 +759,9 @@ function openEditModal(id) {
   document.getElementById('edit-area').value       = rec.area || '';
   document.getElementById('edit-points').value     = rec.points  || 0;
   document.getElementById('edit-avg-bet').value   = rec.avg_bet || 0;
-  document.getElementById('edit-winloss').value   = rec.win_loss || 0;
   document.getElementById('edit-start-coin').value = rec.start_coin || 0;
   document.getElementById('edit-end-coin').value   = rec.end_coin || 0;
+  calcWinLossPreview('edit');
   document.getElementById('edit-note').value      = rec.note    || '';
 
   document.getElementById('editModal').style.display = 'flex';
@@ -791,11 +794,12 @@ document.getElementById('editRecordForm').addEventListener('submit', async funct
     game:      gameName,
     points:     parseFloat(document.getElementById('edit-points').value) || 0,
     avg_bet:    parseFloat(document.getElementById('edit-avg-bet').value) || 0,
-    win_loss:   parseFloat(document.getElementById('edit-winloss').value) || 0,
     start_coin: parseFloat(document.getElementById('edit-start-coin').value) || 0,
     end_coin:   parseFloat(document.getElementById('edit-end-coin').value) || 0,
     note:      document.getElementById('edit-note').value.trim(),
   };
+  // 自動計算盈虧：結束本金 - 起始本金（正=贏，負=輸）
+  updates.win_loss = (updates.end_coin || 0) - (updates.start_coin || 0);
 
   try {
     await dbUpdateRecord(id, updates);
@@ -940,6 +944,24 @@ window.addEventListener('auth-ready', () => {
 // 將所有 inline handler 函數暴露到 window
 //（app.js 是 ES Module，函數預設不在 window 上）
 // ==============================
+
+// 自動計算盈虧預覽（共用：prefix = 'rec' 或 'edit'）
+function calcWinLossPreview(prefix) {
+  const sc = parseFloat(document.getElementById(`${prefix}-start-coin`).value) || 0;
+  const ec = parseFloat(document.getElementById(`${prefix}-end-coin`).value) || 0;
+  const wl = ec - sc;
+  const el = document.getElementById(`${prefix}-winloss-display`);
+  if (!el) return;
+  if (sc === 0 && ec === 0) {
+    el.value = '—';
+    el.style.color = 'var(--gold)';
+    return;
+  }
+  const sign = wl >= 0 ? '+' : '';
+  el.value = `${sign}${wl.toLocaleString()} HKD`;
+  el.style.color = wl > 0 ? '#4CAF50' : wl < 0 ? '#F44336' : 'var(--gold)';
+}
+
 window.onCasinoChange       = onCasinoChange;
 window.onGameTypeChange     = onGameTypeChange;
 window.onGameChange         = onGameChange;
@@ -956,4 +978,5 @@ window.openEditPromoModal   = openEditPromoModal;
 window.openDeleteModal       = openDeleteModal;
 window.closeEditModal        = closeEditModal;
 window.closeEditPromoModal  = closeEditPromoModal;
+window.calcWinLossPreview   = calcWinLossPreview;
 window.closeDeleteModal     = closeDeleteModal;

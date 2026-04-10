@@ -249,19 +249,22 @@
               <label>🎲 平均下注 (HKD)</label>
               <input type="number" id="rec-avg-bet" placeholder="0" min="0" step="0.01" />
             </div>
-            <div class="form-group">
-              <label>📊 實際盈虧 (HKD)</label>
-              <input type="number" id="rec-winloss" placeholder="正數=贏 / 負數=輸" step="1" />
-            </div>
           </div>
           <div class="form-row" style="margin-top:8px">
             <div class="form-group">
               <label>💰 起始本金 (HKD)</label>
-              <input type="number" id="rec-start-coin" placeholder="進場時攜帶金額" step="1" />
+              <input type="number" id="rec-start-coin" placeholder="進場時攜帶金額" step="1"
+                oninput="calcWinLossPreview('rec')" />
             </div>
             <div class="form-group">
               <label>💰 結束本金 (HKD)</label>
-              <input type="number" id="rec-end-coin" placeholder="離場時剩餘金額" step="1" />
+              <input type="number" id="rec-end-coin" placeholder="離場時剩餘金額" step="1"
+                oninput="calcWinLossPreview('rec')" />
+            </div>
+            <div class="form-group">
+              <label>📊 實際盈虧（自動）</label>
+              <input type="text" id="rec-winloss-display" readonly placeholder="—"
+                style="cursor:default;background:rgba(255,255,255,0.04);color:var(--gold);font-weight:700;text-align:center;" />
             </div>
           </div>
 
@@ -540,11 +543,14 @@
         <div class="form-row three-col">
           <div class="form-group"><label>⭐ 賺取積分</label><input type="number" id="edit-points" step="0.01" /></div>
           <div class="form-group"><label>🎲 平均下注</label><input type="number" id="edit-avg-bet" step="0.01" /></div>
-          <div class="form-group"><label>📊 實際盈虧</label><input type="number" id="edit-winloss" step="1" /></div>
+          <div class="form-group"><label>📊 實際盈虧（自動）</label>
+            <input type="text" id="edit-winloss-display" readonly placeholder="—"
+              style="cursor:default;background:rgba(255,255,255,0.04);color:var(--gold);font-weight:700;text-align:center;" />
+          </div>
         </div>
         <div class="form-row" style="margin-top:8px">
-          <div class="form-group"><label>💰 起始本金 (HKD)</label><input type="number" id="edit-start-coin" step="1" /></div>
-          <div class="form-group"><label>💰 結束本金 (HKD)</label><input type="number" id="edit-end-coin" step="1" /></div>
+          <div class="form-group"><label>💰 起始本金 (HKD)</label><input type="number" id="edit-start-coin" step="1" oninput="calcWinLossPreview('edit')" /></div>
+          <div class="form-group"><label>💰 結束本金 (HKD)</label><input type="number" id="edit-end-coin" step="1" oninput="calcWinLossPreview('edit')" /></div>
         </div>
         <div class="form-row">
           <div class="form-group full-width"><label>📝 備註</label><textarea id="edit-note" rows="2"></textarea></div>
