@@ -510,7 +510,7 @@ function renderPromos() {
       : '';
     // 價格只在 table_credit / slot_credit 顯示
     const priceTag  = (p.category === 'table_credit' || p.category === 'slot_credit') && (p.price || 0) > 0
-      ? `<span style="color:#D4AF37;font-weight:600">💰 ${(p.price||0).toLocaleString()} MOP</span>`
+      ? `<span style="color:#D4AF37;font-weight:600">💰 ${(p.price||0).toLocaleString()} HKD</span>`
       : '';
 
     return `<div class="promo-item">
