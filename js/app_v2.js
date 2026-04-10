@@ -388,6 +388,8 @@ document.getElementById('recordForm').addEventListener('submit', async function(
 document.getElementById('promoForm').addEventListener('submit', async function(e) {
   e.preventDefault();
 
+  console.log('[promoForm] submit fired, _userId:', getUserId());
+
   // 決定最終類別：選擇「餐飲」時用次選項值
   const mainCat = document.getElementById('promo-category').value;
   const finalCat = mainCat === 'fb'
@@ -410,17 +412,20 @@ document.getElementById('promoForm').addEventListener('submit', async function(e
     note:            document.getElementById('promo-note').value.trim(),
   };
 
+  console.log('[promoForm] promo to save:', promo);
+
   try {
     const saved = await dbAddPromo(promo);
-    _promos.unshift(saved);  // prepend to cache
-    showToast('🎁 優惠記錄已儲存');
+    _promos.unshift(saved);
+    window._safeToast('🎁 優惠記錄已儲存');
     this.reset();
     document.getElementById('promo-date').value = new Date().toISOString().slice(0, 10);
     document.getElementById('promo-days-group').style.display = 'none';
-    onPromoCategoryChange(); // 重置後同步 UI 狀態
+    onPromoCategoryChange();
     updatePromoDashboard();
     renderPromos();
   } catch (err) {
+    console.error('[promoForm] save error:', err);
     window._safeToast('❌ 儲存失敗：' + err.message, true);
   }
 });
