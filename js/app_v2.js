@@ -1112,6 +1112,21 @@ window.addEventListener('auth-ready', () => {
   initApp();
 });
 
+// Fallback: 如果 auth-ready 已經觸發過，立即執行
+if (window.__AUTH_READY__) {
+  initApp();
+}
+
+// Fallback: 立即填充 casino selects（auth 前就應該有資料）
+(function populateCasinoSelectsImmediately() {
+  const promoCasino = document.getElementById('promo-casino');
+  if (promoCasino) populateCasinoSelect(promoCasino);
+  const filterCasino = document.getElementById('promo-filter-casino');
+  if (filterCasino) populateCasinoSelect(filterCasino);
+  const recCasino = document.getElementById('rec-casino');
+  if (recCasino) populateCasinoSelect(recCasino);
+})();
+
 // ==============================
 // 將所有 inline handler 函數暴露到 window
 //（app.js 是 ES Module，函數預設不在 window 上）
