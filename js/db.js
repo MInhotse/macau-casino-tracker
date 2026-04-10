@@ -30,9 +30,29 @@ export async function dbLoadRecords() {
 
 export async function dbAddRecord(record) {
   if (!_userId) throw new Error('Not authenticated');
-  const newRec = { ...record, user_id: _userId, id: genId(), created_at: new Date().toISOString() };
-  const { error } = await supabase.from('casino_records').insert(newRec);
-  if (error) throw error;
+  const newRec = {
+    id: genId(),
+    user_id: _userId,
+    datetime:  record.datetime  || null,
+    casino:    record.casino    || null,
+    area:      record.area      || null,
+    game_type: record.game_type || null,
+    game:      record.game      || null,
+    points:    record.points    ?? 0,
+    avg_bet:   record.avg_bet   ?? 0,
+    win_loss:  record.win_loss  ?? 0,
+    start_coin:record.start_coin ?? 0,
+    end_coin:  record.end_coin  ?? 0,
+    note:      record.note      || null,
+    created_at: new Date().toISOString(),
+  };
+  console.log('[DB] dbAddRecord inserting:', JSON.stringify(newRec));
+  const { data, error } = await supabase.from('casino_records').insert(newRec);
+  console.log('[DB] dbAddRecord result:', { data, error });
+  if (error) {
+    console.error('[DB] dbAddRecord Supabase error:', error);
+    throw error;
+  }
   return newRec;
 }
 

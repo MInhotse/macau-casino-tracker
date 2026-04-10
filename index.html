@@ -636,7 +636,7 @@
 
     // ── Service Worker ──
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./sw.js').catch(err =>
+      navigator.serviceWorker.register('./sw.js?v=3').catch(err =>
         console.warn('SW registration failed:', err)
       );
     }
@@ -681,6 +681,18 @@
     });
   </script>
 
-  <script type="module" src="js/app.js"></script>
+  <!-- Inline patch: fix showToast before any module loads -->
+  <script>
+    window._safeToast = function(msg, isError) {
+      var t = document.getElementById('toast');
+      if (!t) { alert(msg); return; }
+      t.textContent = msg;
+      t.style.background = isError ? '#ff4444' : '';
+      t.classList.add('show');
+      if (window._tt) clearTimeout(window._tt);
+      window._tt = setTimeout(function() { t.classList.remove('show'); }, 3000);
+    };
+  </script>
+  <script type="module" src="js/app_v2.js"></script>
 </body>
 </html>

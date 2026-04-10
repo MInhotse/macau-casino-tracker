@@ -1,7 +1,7 @@
 /* ==========================================
    Service Worker — 離線緩存（快取殼）
    ========================================== */
-const CACHE_NAME = 'casino-tracker-v1';
+const CACHE_NAME = 'casino-tracker-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
