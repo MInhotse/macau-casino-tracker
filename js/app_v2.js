@@ -4,6 +4,7 @@
 import {
   dbLoadRecords, dbAddRecord, dbUpdateRecord, dbDeleteRecord,
   dbLoadPromos,  dbAddPromo,  dbUpdatePromo,  dbDeletePromo,
+  getUserId,
 } from './db.js';
 
 // ── Global safe toast (bypass any broken showToast) ──────────────────────────
