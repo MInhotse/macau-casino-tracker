@@ -1127,15 +1127,23 @@ if (window.__AUTH_READY__) {
   initApp();
 }
 
-// Fallback 2: 直接查 Supabase session（應對已登入但不觸發 auth-ready 的情況）
-(async () => {
-  if (getUserId()) return; // 已有 userId，直接跳過
-  const { data } = await supabase.auth.getSession();
-  if (data?.session?.user) {
-    setUserId(data.session.user.id);
-    await initApp();
+// Fallback 2: Poll 等待 Supabase session restore 完成
+let _initPolled = false;
+async function pollForSession() {
+  if (_initPolled || getUserId()) return;
+  _initPolled = true;
+  // 等 Supabase 完成 session restore（最多 5 秒）
+  for (let i = 0; i < 50; i++) {
+    const { data } = await supabase.auth.getSession();
+    if (data?.session?.user) {
+      setUserId(data.session.user.id);
+      await initApp();
+      return;
+    }
+    await new Promise(r => setTimeout(r, 100));
   }
-})();
+}
+pollForSession();
 
 // Fallback: 立即填充 casino selects（auth 前就應該有資料）
 (function populateCasinoSelectsImmediately() {
